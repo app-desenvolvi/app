@@ -1,0 +1,20 @@
+{
+  "name": "AppDesenvolVi",
+  "short_name": "DesenvolVi",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0A3D62",
+  "icons": [
+    {
+      "src": "https://app-desenvolvi.github.io/app/ICON_DesenvolVi_9966FF.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://app-desenvolvi.github.io/app/ICON_DesenvolVi_9966FF.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
