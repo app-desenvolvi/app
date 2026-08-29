@@ -23,6 +23,7 @@
             height: 100%;
             overflow: hidden;
             background: #66B7B4; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
         iframe {
             width: 100%;
@@ -30,15 +31,92 @@
             border: none;
             display: block;
         }
+
+        /* 🚀 UX/UI: Botão Flutuante de Instalação PWA */
+        #btnInstalarPWA {
+            display: none; /* Oculto por padrão, ativado via JS */
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            background-color: #FFFFFF;
+            color: #66B7B4;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        #btnInstalarPWA:active {
+            transform: scale(0.95);
+        }
+
+        /* Ícone SVG inline para performance zero-request */
+        #btnInstalarPWA svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
     </style>
 </head>
 <body>
-    <iframe src="https://script.google.com/macros/s/AKfycbxqPuzhHgK2xkfhKp92iqZWPwhp0bxiCbKoqMpaY-I/dev"></iframe>
+    <iframe src="https://script.google.com/macros/s/AKfycbytQm1L6r_0wrZM1mXiTO2HFM_DAfd2tDEF6h7OVxYS0xWfUG5j0y_zGVz-zOLyT1w-/exec"></iframe>
+
+    <button id="btnInstalarPWA" aria-label="Instalar Aplicativo">
+        <svg viewBox="0 0 24 24">
+            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+        </svg>
+        Instalar App
+    </button>
 
     <script>
+        // 1. Registro do Service Worker
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('service-worker.js');
+            navigator.serviceWorker.register('service-worker.js')
+            .catch(err => console.error('Falha ao registrar Service Worker:', err));
         }
+
+        // 2. Lógica de Instalação Defensiva (PWA)
+        let eventoInstalacaoGatilho;
+        const btnInstalar = document.getElementById('btnInstalarPWA');
+
+        // Escuta o evento nativo do navegador para instalação
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Previne que o mini-infobar padrão apareça no mobile
+            e.preventDefault();
+            // Guarda o evento para disparar quando o usuário clicar no botão
+            eventoInstalacaoGatilho = e;
+            // Exibe o nosso botão customizado
+            btnInstalar.style.display = 'flex';
+        });
+
+        // Ação de Clique
+        btnInstalar.addEventListener('click', async () => {
+            if (!eventoInstalacaoGatilho) return;
+
+            // Mostra o prompt nativo de instalação
+            eventoInstalacaoGatilho.prompt();
+
+            // Aguarda a resposta do usuário
+            const { outcome } = await eventoInstalacaoGatilho.userChoice;
+            
+            // Independentemente da escolha, o prompt não pode ser usado novamente, então ocultamos
+            eventoInstalacaoGatilho = null;
+            btnInstalar.style.display = 'none';
+        });
+
+        // Caso o usuário instale por outro meio (menu do browser), esconde o botão
+        window.addEventListener('appinstalled', () => {
+            btnInstalar.style.display = 'none';
+            eventoInstalacaoGatilho = null;
+        });
     </script>
 </body>
 </html>
