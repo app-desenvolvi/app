@@ -1,20 +1,17 @@
 {
-  "name": "AppDesenvolVi",
   "short_name": "DesenvolVi",
-  "start_url": "./",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#0A3D62",
+  "name": "DesenvolVi Portal do Aluno",
   "icons": [
     {
-      "src": "https://app-desenvolvi.github.io/app/ICON_DesenvolVi_9966FF.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "https://app-desenvolvi.github.io/app/ICON_DesenvolVi_9966FF.png",
+      "src": "https://app-desenvolvi.github.io/app/FAVICON_DesenvolVi.png",
+      "type": "image/png",
       "sizes": "512x512",
-      "type": "image/png"
+      "purpose": "any maskable"
     }
-  ]
+  ],
+  "start_url": "index.html",
+  "background_color": "#101828",
+  "theme_color": "#9966FF",
+  "display": "standalone",
+  "orientation": "portrait"
 }
