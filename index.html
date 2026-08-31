@@ -231,7 +231,7 @@
     </div>
   </div>
 
-  <script>
+<script>
     // --- 1. REGISTRO DO SERVICE WORKER NO SEU PRÓPRIO DOMÍNIO ---
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
@@ -244,6 +244,14 @@
     // --- 2. CONTROLE DO FLUXO DE INSTALAÇÃO ---
     var eventoInstalacaoNativa = null;
     var plataformaMovel = "FALLBACK";
+
+    // 🚀 DETECTA SE O APP JÁ ESTÁ INSTALADO OU RODANDO COMO PWA
+    function estaRodandoComoApp() {
+      var condicaoMedia = window.matchMedia('(display-mode: standalone)').matches;
+      var condicaoIos = navigator.standalone === true;
+      var condicaoStorage = localStorage.getItem('pwa_instalado') === 'true';
+      return condicaoMedia || condicaoIos || condicaoStorage;
+    }
 
     // Detecta o sistema operacional do usuário móvel
     function detectarDispositivo() {
@@ -259,15 +267,22 @@
 
     // Gerencia o botão flutuante com base na disponibilidade do sistema
     document.addEventListener("DOMContentLoaded", function() {
+      // 🚀 SE JÁ INSTALADO: Grava no storage para garantir e mata o botão antes de exibir!
+      if (estaRodandoComoApp()) {
+        localStorage.setItem('pwa_instalado', 'true');
+        console.log("⚡ DesenvolVi: PWA já está instalado. Botão flutuante ocultado permanentemente.");
+        return; 
+      }
+
       plataformaMovel = detectarDispositivo();
       var btnInstall = document.getElementById("pwa-install-btn");
 
-      // 🍏 Se for iOS: Mostra o botão sempre (pois a Apple não dispara o evento nativo)
+      // [ IOS ] Se for iOS: Mostra o botão flutuante (pois a Apple não possui o gatilho 'beforeinstallprompt')
       if (plataformaMovel === "IOS") {
         if (btnInstall) btnInstall.style.display = "inline-flex";
       }
 
-      // 🤖 Se for Android: Ouve o gatilho nativo disparado pelo navegador
+      // [ ANDROID ] Se for Android: Ouve o gatilho oficial do Google Chrome
       window.addEventListener("beforeinstallprompt", function(e) {
         e.preventDefault();
         eventoInstalacaoNativa = e;
@@ -299,7 +314,9 @@
         eventoInstalacaoNativa.prompt();
         eventoInstalacaoNativa.userChoice.then(function(choice) {
           if (choice.outcome === 'accepted') {
-            document.getElementById("pwa-install-btn").style.display = "none";
+            var btnInstall = document.getElementById("pwa-install-btn");
+            if (btnInstall) btnInstall.style.display = "none";
+            localStorage.setItem('pwa_instalado', 'true'); // 🚀 Memoriza a instalação com sucesso!
           }
           eventoInstalacaoNativa = null;
         });
@@ -313,9 +330,11 @@
       }
     }
 
-    // Oculta o botão se o app já estiver instalado
+    // Oculta o botão se o app for instalado com sucesso
     window.addEventListener("appinstalled", function() {
-      document.getElementById("pwa-install-btn").style.display = "none";
+      var btnInstall = document.getElementById("pwa-install-btn");
+      if (btnInstall) btnInstall.style.display = "none";
+      localStorage.setItem('pwa_instalado', 'true'); // 🚀 Salva síncronamente no navegador pai
       eventoInstalacaoNativa = null;
     });
   </script>
