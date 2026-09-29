@@ -7,8 +7,30 @@
 
   <!-- 🚀 Link para o manifesto PWA do seu próprio domínio -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#ffffff">
-  
+  <meta name="theme-color" content="#9966FF" id="meta-theme-color">
+
+  <script>
+    // 🎨 Pinta o fundo desta página (o que aparece atrás/ao redor do iframe enquanto ele carrega) com a
+    // cor da unidade vinda em ?unidade=..., ANTES da 1ª pintura da tela (evita flash da cor errada).
+    // Página estática (GitHub Pages) — não lê a planilha ao vivo, por isso o mapa abaixo precisa ser
+    // atualizado manualmente sempre que a coluna COR_PRIMARIA de CONFIGURAÇÕES mudar para alguma unidade.
+    // O nome da unidade tem que ser EXATO (mesma regra do resto do app: sem normalização/apelido).
+    (function aplicarCorDaUnidade() {
+      var CORES_UNIDADE_ = {
+        "TESTE": "#0C2C60",
+        "JF": "#66B7B4",
+        "SJC": "#9966FF"
+      };
+      var COR_PADRAO_ = "#9966FF"; // unidade PADRÃO (e qualquer unidade fora do mapa acima)
+      var params = new URLSearchParams(window.location.search);
+      var unidade = (params.get('unidade') || '').trim().toUpperCase();
+      var cor = CORES_UNIDADE_[unidade] || COR_PADRAO_;
+      document.documentElement.style.setProperty('--cor-fundo-home', cor);
+      var meta = document.getElementById('meta-theme-color');
+      if (meta) meta.setAttribute('content', cor);
+    })();
+  </script>
+
   <!-- Ícones para compatibilidade iOS Safari -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -29,7 +51,7 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background-color: #ffffff;
+      background-color: var(--cor-fundo-home, #9966FF);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
@@ -46,7 +68,7 @@
       position: fixed;
       bottom: 24px;
       right: 24px;
-      background: linear-gradient(135deg, #ffffff 0%, #7D40FF 100%);
+      background: linear-gradient(135deg, #9966FF 0%, #7D40FF 100%);
       color: white;
       border: none;
       border-radius: 50px;
@@ -151,7 +173,7 @@
       margin-bottom: 0;
     }
     .pwa-badge {
-      background: #ffffff;
+      background: #9966FF;
       color: white;
       border-radius: 50%;
       width: 18px;
@@ -210,11 +232,11 @@
         <div class="pwa-ios-instructions">
           <div class="pwa-ios-step">
             <span class="pwa-badge">1</span>
-            <span>Toque no botão de <b>Compartilhar</b> <i class="bi bi-box-arrow-up" style="color: #ffffff;"></i> (na barra inferior do Safari).</span>
+            <span>Toque no botão de <b>Compartilhar</b> <i class="bi bi-box-arrow-up" style="color: #9966FF;"></i> (na barra inferior do Safari).</span>
           </div>
           <div class="pwa-ios-step" style="margin-top: 8px;">
             <span class="pwa-badge">2</span>
-            <span>Role as opções para baixo e selecione <b>Adicionar à Tela de Início</b> <i class="bi bi-plus-square" style="color: #ffffff;"></i>.</span>
+            <span>Role as opções para baixo e selecione <b>Adicionar à Tela de Início</b> <i class="bi bi-plus-square" style="color: #9966FF;"></i>.</span>
           </div>
         </div>
       </div>
