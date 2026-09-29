@@ -7,7 +7,7 @@
 
   <!-- 🚀 Link para o manifesto PWA do seu próprio domínio -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#9966FF" id="meta-theme-color">
+  <meta name="theme-color" content="#FFFFFF" id="meta-theme-color">
 
   <script>
     // 🎨 Pinta o fundo desta página (o que aparece atrás/ao redor do iframe enquanto ele carrega) com a
@@ -21,7 +21,7 @@
         "JF": "#66B7B4",
         "SJC": "#9966FF"
       };
-      var COR_PADRAO_ = "#9966FF"; // unidade PADRÃO (e qualquer unidade fora do mapa acima)
+      var COR_PADRAO_ = "#FFFFFF"; // unidade PADRÃO (e qualquer unidade fora do mapa acima)
       var params = new URLSearchParams(window.location.search);
       var unidade = (params.get('unidade') || '').trim().toUpperCase();
       var cor = CORES_UNIDADE_[unidade] || COR_PADRAO_;
@@ -51,7 +51,7 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background-color: var(--cor-fundo-home, #9966FF);
+      background-color: var(--cor-fundo-home, #FFFFFF);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
@@ -261,6 +261,19 @@
       var query = window.location.search; // ex.: "?page=recibo&r=abc123", ou "" se não houver nada
       document.getElementById('app-iframe').src = URL_BASE_EXEC + query;
     })();
+
+    // 🎨 Depois do login, o app (dentro do iframe) manda a cor REAL da unidade puxada da planilha
+    // (não é mais só o palpite do ?unidade= da URL). Aqui a gente repinta o fundo com essa cor definitiva.
+    window.addEventListener('message', function(event) {
+      var origemValida = /\.googleusercontent\.com$/.test(event.origin) || event.origin === 'https://script.google.com';
+      if (!origemValida) return;
+      if (!event.data || event.data.fonte !== 'desenvolvi-app') return;
+      var cor = event.data.corPrimaria;
+      if (!/^#[0-9A-Fa-f]{6}$/.test(String(cor || ''))) return;
+      document.documentElement.style.setProperty('--cor-fundo-home', cor);
+      var meta = document.getElementById('meta-theme-color');
+      if (meta) meta.setAttribute('content', cor);
+    });
 
     // --- 1. REGISTRO DO SERVICE WORKER NO SEU PRÓPRIO DOMÍNIO ---
     if ('serviceWorker' in navigator) {
