@@ -179,11 +179,10 @@
 <body>
 
   <!-- 🌐 IFRAME DA SUA APLICAÇÃO GOOGLE APPS SCRIPT -->
-  <!-- 🚀 Passe a unidade desejada via Query String síncrona -->
-  <iframe 
+  <!-- 🚀 O src é montado por JS abaixo, repassando ?page=... etc. que vierem na URL desta página -->
+  <iframe
     id="app-iframe"
     class="app-iframe"
-    src="https://script.google.com/macros/s/AKfycbytQm1L6r_0wrZM1mXiTO2HFM_DAfd2tDEF6h7OVxYS0xWfUG5j0y_zGVz-zOLyT1w-/exec" 
     allow="clipboard-write">
   </iframe>
 
@@ -232,6 +231,15 @@
   </div>
 
 <script>
+    // --- 0. MONTA O SRC DO IFRAME, REPASSANDO OS PARÂMETROS DA URL DESTA PÁGINA (?page=recibo&r=..., etc.) ---
+    // Assim, um link enviado ao cliente como https://app-desenvolvi.github.io/app/?page=recibo&r=abc123
+    // abre aqui dentro exatamente a mesma tela, só que sem o aviso padrão do Google.
+    (function montarSrcIframe() {
+      var URL_BASE_EXEC = "https://script.google.com/macros/s/AKfycbytQm1L6r_0wrZM1mXiTO2HFM_DAfd2tDEF6h7OVxYS0xWfUG5j0y_zGVz-zOLyT1w-/exec";
+      var query = window.location.search; // ex.: "?page=recibo&r=abc123", ou "" se não houver nada
+      document.getElementById('app-iframe').src = URL_BASE_EXEC + query;
+    })();
+
     // --- 1. REGISTRO DO SERVICE WORKER NO SEU PRÓPRIO DOMÍNIO ---
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
