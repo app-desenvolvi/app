@@ -7,7 +7,7 @@
 
   <!-- 🚀 Link para o manifesto PWA do seu próprio domínio -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#FFFFFF" id="meta-theme-color">
+  <meta name="theme-color" content="#9966FF" id="meta-theme-color">
 
   <script>
     // 🎨 Pinta o fundo desta página (o que aparece atrás/ao redor do iframe enquanto ele carrega) com a
@@ -21,7 +21,7 @@
         "JF": "#66B7B4",
         "SJC": "#9966FF"
       };
-      var COR_PADRAO_ = "#FFFFFF"; // unidade PADRÃO (e qualquer unidade fora do mapa acima)
+      var COR_PADRAO_ = "#9966FF"; // unidade PADRÃO (e qualquer unidade fora do mapa acima)
       var params = new URLSearchParams(window.location.search);
       var unidade = (params.get('unidade') || '').trim().toUpperCase();
       var cor = CORES_UNIDADE_[unidade] || COR_PADRAO_;
@@ -51,7 +51,7 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background-color: var(--cor-fundo-home, #FFFFFF);
+      background-color: var(--cor-fundo-home, #9966FF);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
