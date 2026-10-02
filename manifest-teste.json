@@ -1,0 +1,19 @@
+{
+  "id": "/app/?unidade=TESTE",
+  "short_name": "DesenvolVi TESTE",
+  "name": "DesenvolVi TESTE - Portal do Aluno",
+  "icons": [
+    {
+      "src": "https://app-desenvolvi.github.io/app/FAVICON_DesenvolVi.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./?unidade=TESTE",
+  "scope": "./",
+  "background_color": "#101828",
+  "theme_color": "#0C2C60",
+  "display": "standalone",
+  "orientation": "portrait"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "/app/?unidade=JF",
+  "short_name": "DesenvolVi JF",
+  "name": "DesenvolVi JF - Portal do Aluno",
+  "icons": [
+    {
+      "src": "https://app-desenvolvi.github.io/app/FAVICON_DesenvolVi.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./?unidade=JF",
+  "scope": "./",
+  "background_color": "#101828",
+  "theme_color": "#66B7B4",
+  "display": "standalone",
+  "orientation": "portrait"
+}
