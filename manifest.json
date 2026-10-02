@@ -1,4 +1,5 @@
 {
+  "id": "/app/",
   "short_name": "DesenvolVi",
   "name": "DesenvolVi Portal do Aluno",
   "icons": [
@@ -9,7 +10,8 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "index.html",
+  "start_url": "./",
+  "scope": "./",
   "background_color": "#101828",
   "theme_color": "#9966FF",
   "display": "standalone",
