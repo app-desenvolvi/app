@@ -6,37 +6,41 @@
   <title>AppDesenvolVi</title>
 
   <!-- 🚀 Link para o manifesto PWA do seu próprio domínio -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#9966FF" id="meta-theme-color">
-
-  <script>
-    // 🎨 Pinta o fundo desta página (o que aparece atrás/ao redor do iframe enquanto ele carrega) com a
-    // cor da unidade vinda em ?unidade=..., ANTES da 1ª pintura da tela (evita flash da cor errada).
-    // Página estática (GitHub Pages) — não lê a planilha ao vivo, por isso o mapa abaixo precisa ser
-    // atualizado manualmente sempre que a coluna COR_PRIMARIA de CONFIGURAÇÕES mudar para alguma unidade.
-    // O nome da unidade tem que ser EXATO (mesma regra do resto do app: sem normalização/apelido).
-    (function aplicarCorDaUnidade() {
-      var CORES_UNIDADE_ = {
-        "TESTE": "#0C2C60",
-        "JF": "#66B7B4",
-        "111": "#66B7B4",
-        "SJC": "#9966FF"
-      };
-      var COR_PADRAO_ = "#9966FF"; // unidade PADRÃO (e qualquer unidade fora do mapa acima)
-      var params = new URLSearchParams(window.location.search);
-      var unidade = (params.get('unidade') || '').trim().toUpperCase();
-      var cor = CORES_UNIDADE_[unidade] || COR_PADRAO_;
-      document.documentElement.style.setProperty('--cor-fundo-home', cor);
-      var meta = document.getElementById('meta-theme-color');
-      if (meta) meta.setAttribute('content', cor);
-    })();
-  </script>
+  <link rel="manifest" href="manifest.json" id="link-manifest">
+  <meta name="theme-color" content="#FFFFFF" id="meta-theme-color">
 
   <!-- Ícones para compatibilidade iOS Safari -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="AppDesenvolVi">
-  <link rel="apple-touch-icon" href="https://app-desenvolvi.github.io/app/FAVICON_DesenvolVi.png">
+  <meta name="apple-mobile-web-app-title" content="AppDesenvolVi" id="meta-apple-title">
+  <link rel="apple-touch-icon" href="https://app-desenvolvi.github.io/app/FAVICON_DesenvolVi.png" id="link-apple-icon">
+
+  <script>
+    // 🏢 Identidade de cada unidade, escolhida por ?unidade=... ANTES da 1ª pintura: cor de fundo, nome do
+    // atalho, ícone (iOS) e manifest (Android). O nome da unidade tem que ser EXATO (mesma regra do resto do
+    // app: sem normalização/apelido). Página estática (GitHub Pages) — não lê a planilha ao vivo, por isso
+    // este mapa é atualizado à mão (cor = coluna COR_PRIMARIA de CONFIGURAÇÕES).
+    // Para dar ícone próprio a uma unidade: suba o PNG no repositório, troque "icone" aqui E o "src" no
+    // manifest-<unidade>.json correspondente (o Android lê o manifest, o iPhone lê o "icone" daqui).
+    var ICONE_PADRAO_ = "https://app-desenvolvi.github.io/app/FAVICON_DesenvolVi.png";
+    var UNIDADES_ = {
+      "TESTE": { cor: "#0C2C60", nome: "Rede DesenvolVi", icone: "https://app-desenvolvi.github.io/app/FAVICON_Rede.png", manifest: "manifest-teste.json" },
+      "JF":    { cor: "#66B7B4", nome: "DesenvolVi JF",    icone: ICONE_PADRAO_, manifest: "manifest-jf.json" },
+      "SJC":   { cor: "#9966FF", nome: "DesenvolVi SJC",   icone: ICONE_PADRAO_, manifest: "manifest-sjc.json" }
+    };
+    var UNIDADE_PADRAO_ = { cor: "#FFFFFF", nome: "AppDesenvolVi", icone: ICONE_PADRAO_, manifest: "manifest.json" };
+    var UNIDADE_URL_ = (new URLSearchParams(window.location.search).get('unidade') || '').trim().toUpperCase();
+    var PERFIL_UNIDADE_ = UNIDADES_[UNIDADE_URL_] || UNIDADE_PADRAO_;
+
+    (function aplicarIdentidadeDaUnidade() {
+      document.documentElement.style.setProperty('--cor-fundo-home', PERFIL_UNIDADE_.cor);
+      var meta = document.getElementById('meta-theme-color');
+      if (meta) meta.setAttribute('content', PERFIL_UNIDADE_.cor);
+      document.getElementById('link-manifest').setAttribute('href', PERFIL_UNIDADE_.manifest);
+      document.getElementById('link-apple-icon').setAttribute('href', PERFIL_UNIDADE_.icone);
+      document.getElementById('meta-apple-title').setAttribute('content', PERFIL_UNIDADE_.nome);
+    })();
+  </script>
 
   <!-- Biblioteca de ícones simples -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -52,7 +56,7 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background-color: var(--cor-fundo-home, #9966FF);
+      background-color: var(--cor-fundo-home, #FFFFFF);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
@@ -286,6 +290,8 @@
     }
 
     // --- 2. CONTROLE DO FLUXO DE INSTALAÇÃO ---
+    // A marca de "já instalado" é por unidade: instalar o atalho da JF não pode esconder o botão da SJC.
+    var CHAVE_PWA_ = 'pwa_instalado_' + (UNIDADE_URL_ || 'PADRAO');
     var eventoInstalacaoNativa = null;
     var plataformaMovel = "FALLBACK";
 
@@ -293,7 +299,7 @@
     function estaRodandoComoApp() {
       var condicaoMedia = window.matchMedia('(display-mode: standalone)').matches;
       var condicaoIos = navigator.standalone === true;
-      var condicaoStorage = localStorage.getItem('pwa_instalado') === 'true';
+      var condicaoStorage = localStorage.getItem(CHAVE_PWA_) === 'true';
       // 🚀 Sem persistência de fechar: O botão só some permanentemente se estiver instalado!
       return condicaoMedia || condicaoIos || condicaoStorage;
     }
@@ -314,13 +320,13 @@
     document.addEventListener("DOMContentLoaded", function() {
       // 🚀 SE JÁ INSTALADO: Aborta antes de mostrar o contêiner
       if (estaRodandoComoApp()) {
-        localStorage.setItem('pwa_instalado', 'true');
+        localStorage.setItem(CHAVE_PWA_, 'true');
         console.log("⚡ DesenvolVi: PWA já instalado. Botão flutuante desativado.");
         return; 
       }
 
       plataformaMovel = detectarDispositivo();
-      var containerPwa = document.getElementById("pwa-container");
+      var containerPwa = document.getElementById("pwa-install-btn");
 
       // [ IOS ] Se for iOS: Mostra o contêiner sempre (pois a Apple não possui o gatilho 'beforeinstallprompt')
       if (plataformaMovel === "IOS") {
@@ -338,7 +344,7 @@
     // ❌ OCULTA O BOTÃO APENAS PARA A VISITA ATUAL (REAPARECE AO CARREGAR NOVAMENTE)
     function fecharBotaoFlutuantePermanente(e) {
       if (e) e.preventDefault();
-      var containerPwa = document.getElementById("pwa-container");
+      var containerPwa = document.getElementById("pwa-install-btn");
       if (containerPwa) {
         containerPwa.style.display = "none";
       }
@@ -370,9 +376,9 @@
         eventoInstalacaoNativa.prompt();
         eventoInstalacaoNativa.userChoice.then(function(choice) {
           if (choice.outcome === 'accepted') {
-            var containerPwa = document.getElementById("pwa-container");
+            var containerPwa = document.getElementById("pwa-install-btn");
             if (containerPwa) containerPwa.style.display = "none";
-            localStorage.setItem('pwa_instalado', 'true'); // Memoriza a instalação com sucesso!
+            localStorage.setItem(CHAVE_PWA_, 'true'); // Memoriza a instalação com sucesso!
           }
           eventoInstalacaoNativa = null;
         });
@@ -388,9 +394,9 @@
 
     // Oculta o botão se o app for instalado com sucesso
     window.addEventListener("appinstalled", function() {
-      var containerPwa = document.getElementById("pwa-container");
+      var containerPwa = document.getElementById("pwa-install-btn");
       if (containerPwa) containerPwa.style.display = "none";
-      localStorage.setItem('pwa_instalado', 'true'); // Salva síncronamente no navegador pai
+      localStorage.setItem(CHAVE_PWA_, 'true'); // Salva síncronamente no navegador pai
       eventoInstalacaoNativa = null;
     });
   </script>
