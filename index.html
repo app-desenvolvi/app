@@ -25,9 +25,9 @@
     // manifest-<unidade>.json correspondente (o Android lê o manifest, o iPhone lê o "icone" daqui).
     var ICONE_PADRAO_ = "https://app-desenvolvi.github.io/app/FAVICON_DesenvolVi.png";
     var UNIDADES_ = {
-      "TESTE": { cor: "#0C2C60", nome: "Rede DesenvolVi", icone: "https://app-desenvolvi.github.io/app/FAVICON_Rede.png", manifest: "manifest-teste.json" },
-      "JF":    { cor: "#66B7B4", nome: "FisioAmandaBaio",    icone: "https://app-desenvolvi.github.io/app/FAVICON_AB.png", manifest: "manifest-jf.json" },
-      "SJC":   { cor: "#9966FF", nome: "DesenvolVi - SJC",   icone: ICONE_PADRAO_, manifest: "manifest-sjc.json" }
+      "TESTE": { cor: "#0C2C60", nome: "Rede DesenvolVi",   icone: "https://app-desenvolvi.github.io/app/FAVICON_Rede.png", manifest: "manifest-teste.json" },
+      "JF":    { cor: "#66B7B4", nome: "FisioAmandaBaio",   icone: "https://app-desenvolvi.github.io/app/FAVICON_AB.png",   manifest: "manifest-jf.json" },
+      "SJC":   { cor: "#9966FF", nome: "DesenvolVi - SJC",  icone: ICONE_PADRAO_,                                          manifest: "manifest-sjc.json" }
     };
     var UNIDADE_PADRAO_ = { cor: "#FFFFFF", nome: "AppDesenvolVi", icone: ICONE_PADRAO_, manifest: "manifest.json" };
     var UNIDADE_URL_ = (new URLSearchParams(window.location.search).get('unidade') || '').trim().toUpperCase();
@@ -37,6 +37,7 @@
       document.documentElement.style.setProperty('--cor-fundo-home', PERFIL_UNIDADE_.cor);
       var meta = document.getElementById('meta-theme-color');
       if (meta) meta.setAttribute('content', PERFIL_UNIDADE_.cor);
+      document.title = PERFIL_UNIDADE_.nome; // o iOS cai no <title> quando não lê o nome do manifest/meta
       document.write('<link rel="manifest" href="' + PERFIL_UNIDADE_.manifest + '">');
       document.getElementById('link-apple-icon').setAttribute('href', PERFIL_UNIDADE_.icone);
       document.getElementById('meta-apple-title').setAttribute('content', PERFIL_UNIDADE_.nome);
