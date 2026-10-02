@@ -6,7 +6,8 @@
   <title>AppDesenvolVi</title>
 
   <!-- 🚀 Link para o manifesto PWA do seu próprio domínio -->
-  <link rel="manifest" href="manifest.json" id="link-manifest">
+  <!-- O <link rel="manifest"> é escrito pelo script abaixo JÁ com o manifest da unidade (o Safari/iOS lê o
+       manifest assim que a tag aparece no HTML; trocar o href depois não é considerado). -->
   <meta name="theme-color" content="#FFFFFF" id="meta-theme-color">
 
   <!-- Ícones para compatibilidade iOS Safari -->
@@ -25,8 +26,8 @@
     var ICONE_PADRAO_ = "https://app-desenvolvi.github.io/app/FAVICON_DesenvolVi.png";
     var UNIDADES_ = {
       "TESTE": { cor: "#0C2C60", nome: "Rede DesenvolVi", icone: "https://app-desenvolvi.github.io/app/FAVICON_Rede.png", manifest: "manifest-teste.json" },
-      "JF":    { cor: "#66B7B4", nome: "DesenvolVi JF",    icone: ICONE_PADRAO_, manifest: "manifest-jf.json" },
-      "SJC":   { cor: "#9966FF", nome: "DesenvolVi SJC",   icone: ICONE_PADRAO_, manifest: "manifest-sjc.json" }
+      "JF":    { cor: "#66B7B4", nome: "FisioAmandaBaio",    icone: "https://app-desenvolvi.github.io/app/FAVICON_AB.png", manifest: "manifest-jf.json" },
+      "SJC":   { cor: "#9966FF", nome: "DesenvolVi - SJC",   icone: ICONE_PADRAO_, manifest: "manifest-sjc.json" }
     };
     var UNIDADE_PADRAO_ = { cor: "#FFFFFF", nome: "AppDesenvolVi", icone: ICONE_PADRAO_, manifest: "manifest.json" };
     var UNIDADE_URL_ = (new URLSearchParams(window.location.search).get('unidade') || '').trim().toUpperCase();
@@ -36,7 +37,7 @@
       document.documentElement.style.setProperty('--cor-fundo-home', PERFIL_UNIDADE_.cor);
       var meta = document.getElementById('meta-theme-color');
       if (meta) meta.setAttribute('content', PERFIL_UNIDADE_.cor);
-      document.getElementById('link-manifest').setAttribute('href', PERFIL_UNIDADE_.manifest);
+      document.write('<link rel="manifest" href="' + PERFIL_UNIDADE_.manifest + '">');
       document.getElementById('link-apple-icon').setAttribute('href', PERFIL_UNIDADE_.icone);
       document.getElementById('meta-apple-title').setAttribute('content', PERFIL_UNIDADE_.nome);
     })();
