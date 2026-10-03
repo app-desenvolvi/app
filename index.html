@@ -8,7 +8,7 @@
   <!-- 🚀 Link para o manifesto PWA do seu próprio domínio -->
   <!-- O <link rel="manifest"> é escrito pelo script abaixo JÁ com o manifest da unidade (o Safari/iOS lê o
        manifest assim que a tag aparece no HTML; trocar o href depois não é considerado). -->
-  <meta name="theme-color" content="#FFFFFF" id="meta-theme-color">
+  <meta name="theme-color" content="#9966FF" id="meta-theme-color">
 
   <!-- Ícones para compatibilidade iOS Safari -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -29,7 +29,7 @@
       "JF":    { cor: "#66B7B4", nome: "FisioAmandaBaio",   icone: "https://app-desenvolvi.github.io/app/FAVICON_AB.png",   manifest: "manifest-jf.json" },
       "SJC":   { cor: "#9966FF", nome: "DesenvolVi - SJC",  icone: ICONE_PADRAO_,                                          manifest: "manifest-sjc.json" }
     };
-    var UNIDADE_PADRAO_ = { cor: "#FFFFFF", nome: "AppDesenvolVi", icone: ICONE_PADRAO_, manifest: "manifest.json" };
+    var UNIDADE_PADRAO_ = { cor: "#9966FF", nome: "AppDesenvolVi", icone: ICONE_PADRAO_, manifest: "manifest.json" };
     var UNIDADE_URL_ = (new URLSearchParams(window.location.search).get('unidade') || '').trim().toUpperCase();
     var PERFIL_UNIDADE_ = UNIDADES_[UNIDADE_URL_] || UNIDADE_PADRAO_;
 
@@ -58,7 +58,7 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background-color: var(--cor-fundo-home, #FFFFFF);
+      background-color: var(--cor-fundo-home, #9966FF);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
