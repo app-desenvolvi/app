@@ -61,14 +61,53 @@
       background-color: var(--cor-fundo-home, #9966FF);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
+    body {
+      display: flex;
+      flex-direction: column; /* faixa de aviso (opcional) em cima, iframe ocupa o resto */
+    }
 
     /* Iframe Responsivo */
     .app-iframe {
       width: 100%;
-      height: 100%;
+      flex: 1 1 auto;
+      min-height: 0;
       border: none;
       display: block;
     }
+
+    /* 📣 FAIXA DE AVISO NO TOPO (estilo do aviso do Apps Script) — fechada uma vez, fica fechada na sessão */
+    .faixa-aviso {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 9px 40px 9px 16px;
+      background: #F1F3F4;
+      border-bottom: 1px solid #DADCE0;
+      color: #3C4043;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-align: center;
+      line-height: 1.3;
+    }
+    .faixa-aviso-fechar {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: none;
+      color: #5F6368;
+      font-size: 1.3rem;
+      line-height: 1;
+      cursor: pointer;
+      border-radius: 50%;
+    }
+    .faixa-aviso-fechar:hover { background: rgba(0, 0, 0, 0.08); }
 
     /* 🚀 BOTÃO FLUTUANTE DO PWA (Floating Action Button) */
     .pwa-fab {
@@ -206,6 +245,19 @@
   </style>
 </head>
 <body>
+
+  <!-- 📣 FAIXA DE AVISO: aparece a cada carregamento da página; o X só a esconde até recarregar -->
+  <div id="faixa-aviso" class="faixa-aviso" role="status">
+<img src="https://app-desenvolvi.github.io/app/Rede_DesenvolVi.png"               style="width: 150px">
+    <span>REDE DE PROFISSIONAIS PELO DESENVOLVIMENTO INFANTIL</span>
+    <button type="button" class="faixa-aviso-fechar" aria-label="Fechar aviso" onclick="fecharFaixaAviso()">&times;</button>
+  </div>
+  <script>
+    // O X só esconde a faixa nesta carga da página; ao recarregar, ela aparece de novo (nada é gravado).
+    function fecharFaixaAviso() {
+      document.getElementById('faixa-aviso').style.display = 'none';
+    }
+  </script>
 
   <!-- 🌐 IFRAME DA SUA APLICAÇÃO GOOGLE APPS SCRIPT -->
   <!-- 🚀 O src é montado por JS abaixo, repassando ?page=... etc. que vierem na URL desta página -->
