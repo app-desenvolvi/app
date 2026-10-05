@@ -14,7 +14,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="AppDesenvolVi" id="meta-apple-title">
-  <link rel="apple-touch-icon" href="https://app-desenvolvi.github.io/app/FAVICON_DesenvolVi.png" id="link-apple-icon">
+  <link rel="apple-touch-icon" href="https://app-desenvolvi.github.io/app/FAVICON_Rede.png" id="link-apple-icon">
 
   <script>
     // 🏢 Identidade de cada unidade, escolhida por ?unidade=... ANTES da 1ª pintura: cor de fundo, nome do
@@ -23,13 +23,13 @@
     // este mapa é atualizado à mão (cor = coluna COR_PRIMARIA de CONFIGURAÇÕES).
     // Para dar ícone próprio a uma unidade: suba o PNG no repositório, troque "icone" aqui E o "src" no
     // manifest-<unidade>.json correspondente (o Android lê o manifest, o iPhone lê o "icone" daqui).
-    var ICONE_PADRAO_ = "https://app-desenvolvi.github.io/app/FAVICON_DesenvolVi.png";
+    var ICONE_PADRAO_ = "https://app-desenvolvi.github.io/app/FAVICON_Rede.png";
     var UNIDADES_ = {
       "TESTE": { cor: "#0C2C60", nome: "Rede DesenvolVi",   icone: "https://app-desenvolvi.github.io/app/FAVICON_Rede.png", manifest: "manifest-teste.json" },
       "VR":    { cor: "#ffa166", nome: "Volta Redonda",   icone: "https://app-desenvolvi.github.io/app/FAVICON_VR.png",   manifest: "manifest-jf.json" },
       "PANOS":    { cor: "#0C2C60", nome: "Primeiros Anos Importam",   icone: "https://app-desenvolvi.github.io/app/FAVICON_PANOS.png",   manifest: "manifest-jf.json" },
       "JF":    { cor: "#66B7B4", nome: "FisioAmandaBaio",   icone: "https://app-desenvolvi.github.io/app/FAVICON_AB.png",   manifest: "manifest-jf.json" },
-      "SJC":   { cor: "#9966FF", nome: "DesenvolVi - SJC",  icone: ICONE_PADRAO_,                                          manifest: "manifest-sjc.json" }
+      "SJC":   { cor: "#9966FF", nome: "DesenvolVi",  icone: "https://app-desenvolvi.github.io/app/FAVICON_DesenvolVi.png",   manifest: "manifest-sjc.json" }
     };
     var UNIDADE_PADRAO_ = { cor: "#9966FF", nome: "AppDesenvolVi", icone: ICONE_PADRAO_, manifest: "manifest.json" };
     var UNIDADE_URL_ = (new URLSearchParams(window.location.search).get('unidade') || '').trim().toUpperCase();
@@ -277,7 +277,7 @@
   <!-- 📱 POPUP DE INSTALAÇÃO MULTI-PLATAFORMA -->
   <div id="pwa-modal" class="pwa-modal-overlay" onclick="fecharInstaladorPWA(event)">
     <div class="pwa-modal-box" onclick="event.stopPropagation()">
-      <img src="https://app-desenvolvi.github.io/app/FAVICON_DesenvolVi.png" alt="Logo DesenvolVi" class="pwa-logo">
+      <img src="https://app-desenvolvi.github.io/app/FAVICON_Rede.png" alt="Logo" class="pwa-logo">
       <div class="pwa-title">Instalar o AppDesenvolVi</div>
       <p class="pwa-text">Fixe o aplicativo direto na tela inicial do seu celular para ter carregamento instantâneo, visual em tela cheia e performance otimizada!</p>
 
