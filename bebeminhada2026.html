@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bebêminhada Solidária 2026</title>
+  <meta name="description" content="Uma caminhada que conecta famílias, marcas e solidariedade. Em benefício da Associação Guadalupe.">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js"></script>
+  <style>
+    :root { --cream:#fff9ef; --ink:#173f45; --body:#31575b; --coral:#e96e5b; --terra:#b95743; --sage:#a9bba4; --sand:#f1eadb; --line:rgba(23,63,69,.15); }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin:0; color:var(--ink); font-family:"DM Sans",sans-serif; background:var(--cream); }
+    .section-anchor { scroll-margin-top: 6.5rem; }
+    .topbar { backdrop-filter: blur(16px); background: rgba(255,249,239,.9); border-bottom: 1px solid rgba(23,63,69,.1); }
+    .nav-link { position:relative; font-weight:500; }
+    .nav-link::after { content:""; position:absolute; left:0; bottom:-5px; height:2px; width:0; background:var(--coral); transition:width .2s ease; }
+    .nav-link:hover::after, .nav-link:focus-visible::after { width:100%; }
+    .cta-button { display:inline-flex; align-items:center; justify-content:center; gap:.55rem; border-radius:999px; padding:.9rem 1.25rem; font-weight:700; color:#fff; transition:transform .2s ease, box-shadow .2s ease; }
+    .cta-button:hover { transform:translateY(-2px); box-shadow:0 12px 24px rgba(23,63,69,.16); }
+    a:focus-visible, button:focus-visible { outline:3px solid var(--coral); outline-offset:4px; }
+    .eyebrow { font-size:13px; font-weight:700; letter-spacing:.16rem; text-transform:uppercase; }
+    h1, h2, h3 { font-weight:700; margin:0; }
+    h2 { font-size:clamp(1.6rem, 3.2vw, 2.4rem); line-height:1.15; letter-spacing:-.04em; }
+    .hero-orb { animation:drift 7s ease-in-out infinite alternate; }
+    @keyframes drift { from { transform:translate(0,0) rotate(0); } to { transform:translate(-14px,12px) rotate(8deg); } }
+    .reveal { animation:reveal .7s both ease-out; }
+    .reveal-delay { animation:reveal .7s .16s both ease-out; }
+    @keyframes reveal { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+    .soft-card { border:1px solid var(--line); box-shadow:0 16px 40px rgba(23,63,69,.07); }
+    .lift-card { transition:transform .25s ease, box-shadow .25s ease; }
+    .lift-card:hover { transform:translateY(-6px); box-shadow:0 20px 44px rgba(23,63,69,.14); }
+    .timeline-dot { box-shadow:0 0 0 7px var(--cream); }
+    #tabela tbody tr:nth-child(odd) { background:var(--sand); }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior:auto; }
+      .hero-orb, .reveal, .reveal-delay { animation:none; }
+      *, *::before, *::after { transition-duration:.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+<div class="w-full overflow-hidden">
+
+  <!-- Menu -->
+  <header class="topbar fixed top-0 z-50 w-full">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
+      <a href="#topo" class="text-sm font-bold" style="letter-spacing:.08rem">BEBÊMINHADA SOLIDÁRIA · 2026</a>
+      <nav aria-label="Navegação principal" class="hidden items-center gap-7 md:flex">
+        <a href="#causa" class="nav-link">A causa</a>
+        <a href="#experiencia" class="nav-link">A experiência</a>
+        <a href="#visibilidade" class="nav-link">Visibilidade</a>
+        <a href="#patrocinio" class="nav-link">Patrocínio</a>
+        <a href="https://wa.me/5512992009404?text=Quero%20contribuir%20com%20a%20Beb%C3%AAminhada%202026%20sendo%20um%20patrocinador" target="_blank" rel="noopener noreferrer" class="cta-button" style="background:var(--coral)">Seja um patrocinador</a>
+      </nav>
+      <button id="menu-button" type="button" aria-expanded="false" aria-controls="mobile-nav" class="rounded-full p-2 md:hidden">
+        <i data-lucide="menu" aria-hidden="true"></i><span class="sr-only">Abrir menu</span>
+      </button>
+    </div>
+    <nav id="mobile-nav" aria-label="Navegação móvel" class="hidden border-t border-[#173f4520] px-5 pb-5 md:hidden">
+      <div class="flex flex-col gap-4 pt-4 font-medium">
+        <a href="#causa">A causa</a>
+        <a href="#experiencia">A experiência</a>
+        <a href="#visibilidade">Visibilidade</a>
+        <a href="#patrocinio">Patrocínio</a>
+        <a href="https://wa.me/5512992009404?text=Quero%20contribuir%20com%20a%20Beb%C3%AAminhada%202026%20sendo%20um%20patrocinador" target="_blank" rel="noopener noreferrer" class="cta-button w-full" style="background:var(--coral)">Seja um patrocinador</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="topo">
+    <!-- Hero -->
+    <section class="relative pt-28">
+      <div class="absolute left-[-10rem] top-24 h-80 w-80 rounded-full bg-[#a9bba466] blur-3xl"></div>
+      <div class="absolute right-[-8rem] top-20 h-72 w-72 rounded-full bg-[#e96e5b30] blur-3xl"></div>
+      <div class="relative mx-auto grid max-w-7xl items-center gap-10 px-5 pb-20 pt-10 lg:grid-cols-[1.02fr_.98fr] lg:px-8 lg:pb-28 lg:pt-16">
+        <div class="max-w-2xl">
+          <p class="eyebrow reveal mb-5" style="color:var(--terra)">Bebêminhada Solidária 2026</p>
+          <!-- Coloque o arquivo da logo em img/logo.png -->
+          <img src="Logo.png" alt="Logo oficial da Bebêminhada Solidária" onerror="this.style.display='none'" class="reveal-delay mx-auto mb-8 h-auto w-72 max-w-full object-contain sm:w-96 lg:mx-0 lg:w-[27rem]">
+          <h1 class="reveal-delay mb-6 leading-[.98]" style="font-size:clamp(2.4rem,6vw,4.5rem);letter-spacing:-.055em">Cada passo transforma.</h1>
+          <p class="reveal-delay max-w-xl" style="color:var(--body);font-size:19px;line-height:1.55">Uma caminhada que conecta famílias, marcas e solidariedade.</p>
+          <a href="https://wa.me/5512992009404?text=Quero%20contribuir%20com%20a%20Beb%C3%AAminhada%202026%20sendo%20um%20patrocinador" target="_blank" rel="noopener noreferrer" class="cta-button reveal-delay mt-9" style="background:var(--ink)">Quero apoiar essa causa</a>
+        </div>
+        <div class="relative mx-auto w-full max-w-xl">
+          <div class="hero-orb absolute -right-4 -top-5 h-28 w-28 rounded-full bg-[#e96e5b]"></div>
+          <div class="hero-orb absolute -bottom-5 -left-4 h-36 w-36 rounded-full bg-[#a9bba4]"></div>
+          <div class="relative overflow-hidden rounded-[2rem] border-[7px] border-white shadow-2xl">
+            <img src="https://images.pexels.com/photos/20243343/pexels-photo-20243343.jpeg" alt="Uma mãe caminha com seu filho em um carrinho por um parque ensolarado." class="h-[25rem] w-full object-cover sm:h-[31rem]">
+            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#173f45cc] to-transparent px-7 pb-7 pt-16">
+              <p class="max-w-xs font-medium leading-relaxed text-white">Uma manhã de encontro, movimento e afeto.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Causa -->
+    <section id="causa" class="section-anchor bg-[#173f45] py-20 lg:py-28">
+      <div class="mx-auto grid max-w-7xl gap-12 px-5 lg:grid-cols-2 lg:px-8">
+        <div>
+          <p class="eyebrow mb-5" style="color:var(--sage)">Nossa causa</p>
+          <h2 class="max-w-lg text-white">Uma rede de cuidado começa quando a gente caminha junto.</h2>
+          <p class="mt-8 max-w-xl" style="color:#f8efe2;font-size:20px;line-height:1.55">Cada parceria ajuda a acolher mães e bebês em situação de vulnerabilidade.</p>
+        </div>
+        <div class="flex flex-col justify-center">
+          <div class="flex flex-col gap-7 rounded-[1.5rem] p-7 sm:flex-row sm:items-center sm:justify-between" style="background:var(--cream)">
+            <div class="min-w-0 flex-1">
+              <p class="text-xs font-bold uppercase" style="color:var(--terra);letter-spacing:.15rem">Em benefício de</p>
+              <h3 class="mt-3" style="font-size:19px">ASSOCIAÇÃO GUADALUPE</h3>
+              <p class="mt-3" style="color:var(--body);line-height:1.5">Uma parceria que faz o cuidado chegar mais longe.</p>
+              <a href="http://associacaoguadalupe.org.br/" target="_blank" rel="noopener noreferrer" class="mt-5 inline-flex font-bold underline decoration-2 underline-offset-4" style="color:var(--terra)">Conheça a Associação Guadalupe</a>
+            </div>
+            <!-- Coloque o arquivo em img/guadalupe.png -->
+            <figure class="shrink-0 self-center overflow-hidden rounded-[1.25rem] sm:w-40 m-0">
+              <img src="Guadalupe.png" alt="Imagem em formato de coração com gestante e símbolo de pegada azul." onerror="this.parentElement.style.display='none'" class="h-40 w-full object-contain sm:h-44">
+            </figure>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Experiência -->
+    <section id="experiencia" class="section-anchor py-20 lg:py-28">
+      <div class="mx-auto max-w-7xl px-5 lg:px-8">
+        <div class="grid gap-8 lg:grid-cols-[.8fr_1.2fr]">
+          <div>
+            <p class="eyebrow mb-5" style="color:var(--terra)">A experiência</p>
+            <h2>Um encontro para viver junto.</h2>
+          </div>
+          <p class="max-w-2xl self-end" style="color:var(--body);font-size:18px;line-height:1.6">Uma manhã desenhada para brincar, descobrir e estar junto. A programação combina movimento, afeto e oportunidades naturais de interação entre marcas e famílias.</p>
+        </div>
+        <div class="mt-12 grid gap-5 md:grid-cols-3">
+          <article class="soft-card lift-card rounded-[1.5rem] bg-white p-7">
+            <div class="mb-10 inline-flex rounded-full bg-[#e96e5b24] p-3 text-[#b95743]"><i data-lucide="footprints" aria-hidden="true"></i></div>
+            <h3 style="font-size:19px">Caminhada em família</h3>
+            <p class="mt-3" style="color:var(--body);line-height:1.55">Um percurso compartilhado, no ritmo de cada família.</p>
+          </article>
+          <article class="soft-card lift-card rounded-[1.5rem] bg-white p-7">
+            <div class="mb-10 inline-flex rounded-full bg-[#a9bba466] p-3 text-[#173f45]"><i data-lucide="sparkles" aria-hidden="true"></i></div>
+            <h3 style="font-size:19px">Momentos de descoberta</h3>
+            <p class="mt-3" style="color:var(--body);line-height:1.55">Atividades para brincar, explorar e criar memórias.</p>
+          </article>
+          <article class="soft-card lift-card rounded-[1.5rem] bg-white p-7">
+            <div class="mb-10 inline-flex rounded-full bg-[#173f451c] p-3 text-[#173f45]"><i data-lucide="heart-handshake" aria-hidden="true"></i></div>
+            <h3 style="font-size:19px">Encontros que acolhem</h3>
+            <p class="mt-3" style="color:var(--body);line-height:1.55">Um espaço leve para conexões entre famílias, marcas e causa.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Visibilidade -->
+    <section id="visibilidade" class="section-anchor bg-[#f1eadb] py-20 lg:py-28">
+      <div class="mx-auto max-w-7xl px-5 lg:px-8">
+        <div class="max-w-2xl">
+          <p class="eyebrow mb-5" style="color:var(--terra)">Jornada de visibilidade</p>
+          <h2>Presença que acompanha toda a história.</h2>
+        </div>
+        <div class="mt-14 grid gap-6 lg:grid-cols-3">
+          <article class="relative border-l border-[#173f4533] pl-7 lg:border-l-0 lg:border-t lg:pl-0 lg:pt-7">
+            <span class="timeline-dot absolute -left-2 top-0 h-4 w-4 rounded-full bg-[#e96e5b] lg:-top-2 lg:left-0"></span>
+            <p class="eyebrow" style="color:var(--terra);letter-spacing:.15rem">Antes</p>
+            <h3 class="mt-3" style="font-size:19px">Criar expectativa</h3>
+            <ul class="mt-5 space-y-3 list-none p-0" style="color:var(--body)"><li>• Publicações pré-evento</li><li>• Divulgação das inscrições</li></ul>
+          </article>
+          <article class="relative border-l border-[#173f4533] pl-7 lg:border-l-0 lg:border-t lg:pl-0 lg:pt-7">
+            <span class="timeline-dot absolute -left-2 top-0 h-4 w-4 rounded-full bg-[#a9bba4] lg:-top-2 lg:left-0"></span>
+            <p class="eyebrow" style="color:#587c74;letter-spacing:.15rem">Durante</p>
+            <h3 class="mt-3" style="font-size:19px">Viver a experiência</h3>
+            <ul class="mt-5 space-y-3 list-none p-0" style="color:var(--body)"><li>• Presença e ativação da marca</li><li>• Brindes, fotos e vídeos</li></ul>
+          </article>
+          <article class="relative border-l border-[#173f4533] pl-7 lg:border-l-0 lg:border-t lg:pl-0 lg:pt-7">
+            <span class="timeline-dot absolute -left-2 top-0 h-4 w-4 rounded-full bg-[#173f45] lg:-top-2 lg:left-0"></span>
+            <p class="eyebrow" style="color:var(--ink);letter-spacing:.15rem">Depois</p>
+            <h3 class="mt-3" style="font-size:19px">Permanecer na memória</h3>
+            <ul class="mt-5 space-y-3 list-none p-0" style="color:var(--body)"><li>• Publicações pós-evento</li><li>• Agradecimentos e registros da ação</li></ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Patrocínio -->
+    <section id="patrocinio" class="section-anchor py-20 lg:py-28">
+      <div class="mx-auto max-w-7xl px-5 lg:px-8">
+        <div class="mx-auto max-w-3xl text-center">
+          <p class="eyebrow mb-5" style="color:var(--terra)">Cotas de patrocínio</p>
+          <h2>Uma causa que também pode ser a sua.</h2>
+          <p class="mt-5" style="color:var(--body);line-height:1.6">Escolha o nível de presença ideal para a sua marca. Todas as cotas conectam sua empresa à causa. As entregas ampliam conforme o nível de visibilidade e interação.</p>
+        </div>
+        <div class="soft-card mt-12 overflow-x-auto rounded-[1.5rem]">
+          <table id="tabela" class="w-full min-w-[680px] border-collapse text-left">
+            <thead>
+              <tr class="bg-[#173f45] text-white">
+                <th class="px-5 py-4 font-semibold">ENTREGAS</th>
+                <th class="px-5 py-4 font-semibold">OURO</th>
+                <th class="px-5 py-4 font-semibold">PRATA</th>
+                <th class="px-5 py-4 font-semibold">BRONZE</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Resultados -->
+    <section class="bg-[#e96e5b] py-20 lg:py-28">
+      <div class="mx-auto max-w-7xl px-5 lg:px-8">
+        <p class="eyebrow text-white" style="letter-spacing:.16rem">1ª edição · Outubro de 2025</p>
+        <div class="mt-7 grid gap-10 lg:grid-cols-[1fr_1.1fr]">
+          <div>
+            <h2 class="text-white">Solidariedade que virou estrutura</h2>
+            <p class="mt-5 max-w-xl" style="color:#fff8ef;font-size:18px;line-height:1.6">O valor arrecadado contribuiu para a finalização do novo prédio destinado às gestantes atendidas pela Guadalupe.</p>
+          </div>
+          <div class="grid grid-cols-2 gap-4 self-start">
+            <div class="rounded-[1.35rem] p-6" style="background:var(--cream)">
+              <p class="m-0 font-bold" style="font-size:52px;letter-spacing:-.05em">18</p>
+              <p class="mt-2 text-[11px] font-bold uppercase" style="color:var(--terra);letter-spacing:.12rem">Patrocinadores</p>
+            </div>
+            <div class="rounded-[1.35rem] p-6" style="background:var(--ink)">
+              <p class="m-0 font-bold text-white" style="font-size:52px;letter-spacing:-.05em">15</p>
+              <p class="mt-2 text-[11px] font-bold uppercase" style="color:#dce5d8;letter-spacing:.12rem">Parceiros</p>
+            </div>
+          </div>
+        </div>
+        <p class="mt-12 max-w-2xl border-l-2 border-white pl-5 text-lg font-medium leading-relaxed text-white">A primeira caminhada já mostrou o tamanho dessa transformação.</p>
+      </div>
+    </section>
+
+    <!-- Vídeo -->
+    <section class="py-20 lg:py-28">
+      <div class="mx-auto max-w-7xl px-5 lg:px-8">
+        <div class="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p class="eyebrow mb-5" style="color:var(--terra)">Registros de afeto</p>
+            <h2>Veja como foi · 1ª edição</h2>
+          </div>
+          <p class="max-w-sm" style="color:var(--body);line-height:1.5">Famílias, parceiros e solidariedade ocupando a Praça do Aquarius, em São José dos Campos.</p>
+        </div>
+        <div class="mx-auto mt-8 w-full max-w-4xl overflow-hidden rounded-[1.5rem] border border-[#173f4520] bg-[#f1eadb] shadow-xl" style="aspect-ratio:16/9">
+          <iframe class="block h-full w-full" src="https://www.youtube.com/embed/P7JsvpRpujs?si=OCcNXbC5KYLSllEk" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen style="border:0"></iframe>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contato -->
+    <section id="contato" class="section-anchor px-5 pb-20 lg:px-8 lg:pb-28">
+      <div class="mx-auto max-w-7xl overflow-hidden rounded-[2rem] px-7 py-14 text-center sm:px-12 lg:py-20" style="background:var(--ink)">
+        <p class="eyebrow" style="color:var(--sage)">Convite à parceria</p>
+        <h2 class="mx-auto mt-5 max-w-3xl text-white">Faça parte de uma história que as famílias vão lembrar.</h2>
+        <p class="mx-auto mt-6 max-w-2xl" style="color:#e9f0e5;font-size:19px;line-height:1.55">Cada passo conta. Cada família transforma. Juntos, fazemos a diferença.</p>
+        <a href="https://wa.me/5512992009404?text=Quero%20contribuir%20com%20a%20Beb%C3%AAminhada%202026%20sendo%20um%20patrocinador" target="_blank" rel="noopener noreferrer" class="cta-button mt-9" style="background:var(--coral)">Seja um patrocinador</a>
+        <p class="mt-5 font-medium" style="color:var(--sage)">Fale com a nossa equipe</p>
+        <a href="tel:+5512992009404" class="mt-1 inline-block text-[19px] font-bold text-white">(12) 9 9200-9404</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-[#173f4520] px-5 py-8 lg:px-8">
+    <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
+      <p class="m-0 font-bold">Bebêminhada Solidária 2026</p>
+      <p class="m-0" style="color:var(--body)">Associação Guadalupe</p>
+      <a href="#topo" class="font-bold underline decoration-2 underline-offset-4" style="color:var(--terra)">Voltar ao topo</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+  // Tabela de cotas: edite aqui. 1 = tem, 0 = não tem (colunas: ouro, prata, bronze)
+  const linhas = [
+    ["Espaço para ativação",        1, 0, 0],
+    ["Logo na camiseta",            1, 0, 0],
+    ["Logo no backdrop DESTAQUE",   1, 0, 0],
+    ["Logo no kit",                 1, 1, 0],
+    ["Vídeo no Instagram",          1, 1, 0],
+    ["Divulgação nas redes",        1, 1, 1],
+    ["Menção durante o evento",     1, 1, 1],
+    ["Brindes nos kits",            1, 1, 1],
+    ["Comunicação pré e pós",       1, 1, 1],
+    ["Registro fotográfico",        1, 1, 1],
+  ];
+  const tbody = document.querySelector("#tabela tbody");
+  const td = (t) => `<td class="px-5 py-4">${t}</td>`;
+  tbody.innerHTML =
+    `<tr><th class="px-5 py-4 font-bold">Investimento</th>${["R$ 1.500","R$ 1.000","R$ 500"].map(p => `<td class="px-5 py-4 font-bold">${p}</td>`).join("")}</tr>` +
+    linhas.map(([nome, ...v]) => `<tr><th class="px-5 py-4 font-medium">${nome}</th>${v.map(x => td(x ? "✓" : "—")).join("")}</tr>`).join("");
+
+  document.addEventListener("DOMContentLoaded", () => {
+    lucide.createIcons();
+    const btn = document.getElementById("menu-button");
+    const nav = document.getElementById("mobile-nav");
+    const fechar = () => { nav.classList.add("hidden"); btn.setAttribute("aria-expanded", "false"); };
+    btn.addEventListener("click", () => {
+      const aberto = !nav.classList.contains("hidden");
+      nav.classList.toggle("hidden", aberto);
+      btn.setAttribute("aria-expanded", String(!aberto));
+    });
+    nav.querySelectorAll("a").forEach(a => a.addEventListener("click", fechar));
+  });
+</script>
+</body>
+</html>
