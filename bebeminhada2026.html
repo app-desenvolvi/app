@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bebêminhada Solidária 2026</title>
-  <meta name="description" content="Uma caminhada que conecta famílias, marcas e solidariedade. Em benefício da Associação Guadalupe.">
+  <meta name="description" content="8 de novembro de 2026, às 10h, na Praça Ulysses Guimarães (Parque Res. Aquarius), em São José dos Campos. Uma caminhada em família em benefício da Associação Guadalupe. Garanta seu kit!">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js"></script>
@@ -20,10 +20,15 @@
     .nav-link:hover::after, .nav-link:focus-visible::after { width:100%; }
     .cta-button { display:inline-flex; align-items:center; justify-content:center; gap:.55rem; border-radius:999px; padding:.9rem 1.25rem; font-weight:700; color:#fff; transition:transform .2s ease, box-shadow .2s ease; }
     .cta-button:hover { transform:translateY(-2px); box-shadow:0 12px 24px rgba(59,42,99,.16); }
+    /* Os dois botões principais da página: inscrição (laranja) e patrocínio (roxo) */
+    .cta-grande { padding:1.15rem 1.6rem; font-size:1.12rem; line-height:1.25; text-align:center; box-shadow:0 10px 24px rgba(59,42,99,.18); }
+    .cta-inscricao { background:var(--coral); }
+    .cta-patrocinio { background:var(--ink); }
     a:focus-visible, button:focus-visible { outline:3px solid var(--coral); outline-offset:4px; }
     .eyebrow { font-size:13px; font-weight:700; letter-spacing:.16rem; text-transform:uppercase; }
     h1, h2, h3 { font-weight:700; margin:0; }
     h2 { font-size:clamp(1.6rem, 3.2vw, 2.4rem); line-height:1.15; letter-spacing:-.04em; }
+    .lead { color:var(--body); font-size:18px; line-height:1.6; }
     .hero-orb { animation:drift 7s ease-in-out infinite alternate; }
     @keyframes drift { from { transform:translate(0,0) rotate(0); } to { transform:translate(-14px,12px) rotate(8deg); } }
     .reveal { animation:reveal .7s both ease-out; }
@@ -32,7 +37,9 @@
     .soft-card { border:1px solid var(--line); box-shadow:0 16px 40px rgba(59,42,99,.07); }
     .lift-card { transition:transform .25s ease, box-shadow .25s ease; }
     .lift-card:hover { transform:translateY(-6px); box-shadow:0 20px 44px rgba(59,42,99,.14); }
-    .timeline-dot { box-shadow:0 0 0 7px var(--cream); }
+    .timeline-dot { box-shadow:0 0 0 7px var(--ink); }
+    .chip { display:inline-flex; align-items:center; gap:.5rem; border-radius:999px; background:#fff; border:1px solid var(--line); padding:.5rem .9rem; font-size:15px; font-weight:600; }
+    .chip svg { color:var(--terra); }
     #tabela tbody tr:nth-child(odd) { background:var(--sand); }
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior:auto; }
@@ -47,42 +54,52 @@
   <!-- Menu -->
   <header class="topbar fixed top-0 z-50 w-full">
     <div class="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
-      <a href="#topo" class="text-sm font-bold" style="letter-spacing:.08rem">BEBÊMINHADA SOLIDÁRIA · 2026</a>
-      <nav aria-label="Navegação principal" class="hidden items-center gap-7 md:flex">
+      <a href="#topo" class="whitespace-nowrap text-sm font-bold" style="letter-spacing:.08rem">BEBÊMINHADA SOLIDÁRIA · 2026</a>
+      <!-- Menu horizontal só de 1280px para cima; abaixo disso, menu hambúrguer -->
+      <nav aria-label="Navegação principal" class="hidden items-center gap-5 whitespace-nowrap xl:flex xl:gap-7">
+        <a href="#evento" class="nav-link">O evento</a>
         <a href="#causa" class="nav-link">A causa</a>
-        <a href="#experiencia" class="nav-link">A experiência</a>
-        <a href="#visibilidade" class="nav-link">Visibilidade</a>
-        <a href="#patrocinio" class="nav-link">Patrocínio</a>
-        <a href="https://wa.me/5512992009404?text=Quero%20contribuir%20com%20a%20Beb%C3%AAminhada%202026%20sendo%20um%20patrocinador" target="_blank" rel="noopener noreferrer" class="cta-button" style="background:var(--coral)">Seja um patrocinador</a>
+        <a href="#participe" class="nav-link">Participe</a>
+        <a href="#empresas" class="nav-link">Para empresas</a>
+        <a href="https://app.desenvolvi.site/evento.html" class="cta-button cta-inscricao">Inscreva-se</a>
+        <a href="#empresas" class="cta-button cta-patrocinio">Seja um patrocinador</a>
       </nav>
-      <button id="menu-button" type="button" aria-expanded="false" aria-controls="mobile-nav" class="rounded-full p-2 md:hidden">
+      <button id="menu-button" type="button" aria-expanded="false" aria-controls="mobile-nav" class="rounded-full p-2 xl:hidden">
         <i data-lucide="menu" aria-hidden="true"></i><span class="sr-only">Abrir menu</span>
       </button>
     </div>
-    <nav id="mobile-nav" aria-label="Navegação móvel" class="hidden border-t border-[#3b2a6320] px-5 pb-5 md:hidden">
+    <nav id="mobile-nav" aria-label="Navegação móvel" class="hidden border-t border-[#3b2a6320] px-5 pb-5 xl:hidden">
       <div class="flex flex-col gap-4 pt-4 font-medium">
+        <a href="#evento">O evento</a>
         <a href="#causa">A causa</a>
-        <a href="#experiencia">A experiência</a>
-        <a href="#visibilidade">Visibilidade</a>
-        <a href="#patrocinio">Patrocínio</a>
-        <a href="https://wa.me/5512992009404?text=Quero%20contribuir%20com%20a%20Beb%C3%AAminhada%202026%20sendo%20um%20patrocinador" target="_blank" rel="noopener noreferrer" class="cta-button w-full" style="background:var(--coral)">Seja um patrocinador</a>
+        <a href="#participe">Participe</a>
+        <a href="#empresas">Para empresas</a>
+        <a href="https://app.desenvolvi.site/evento.html" class="cta-button w-full cta-inscricao">Faça sua inscrição, participe!</a>
+        <a href="#empresas" class="cta-button w-full cta-patrocinio">Seja um patrocinador</a>
       </div>
     </nav>
   </header>
 
   <main id="topo">
-    <!-- Hero -->
+
+    <!-- ============ HERO ============ -->
     <section class="relative pt-28">
       <div class="absolute left-[-10rem] top-24 h-80 w-80 rounded-full bg-[#7ac14366] blur-3xl"></div>
       <div class="absolute right-[-8rem] top-20 h-72 w-72 rounded-full bg-[#f5863430] blur-3xl"></div>
       <div class="relative mx-auto grid max-w-7xl items-center gap-10 px-5 pb-20 pt-10 lg:grid-cols-[.8fr_1.2fr] lg:px-8 lg:pb-28 lg:pt-16">
         <div class="max-w-2xl">
-          <p class="eyebrow reveal mb-5" style="color:var(--terra)">Bebêminhada Solidária 2026</p>
-          <!-- Coloque o arquivo da logo em img/logo.png -->
-          <img src="Logo.png" alt="Logo oficial da Bebêminhada Solidária" onerror="this.style.display='none'" class="reveal-delay mx-auto mb-8 h-auto w-72 max-w-full object-contain sm:w-96 lg:mx-0 lg:w-[27rem]">
-          <h1 class="reveal-delay mb-6 leading-[.98]" style="font-size:clamp(2.4rem,6vw,4.5rem);letter-spacing:-.055em">Cada passo transforma.</h1>
-          <p class="reveal-delay max-w-xl" style="color:var(--body);font-size:19px;line-height:1.55">Uma caminhada que conecta famílias, marcas e solidariedade.</p>
-          <a href="https://wa.me/5512992009404?text=Quero%20contribuir%20com%20a%20Beb%C3%AAminhada%202026%20sendo%20um%20patrocinador" target="_blank" rel="noopener noreferrer" class="cta-button reveal-delay mt-9" style="background:var(--ink)">Quero apoiar essa causa</a>
+          <img src="Logo.png" alt="Logo oficial da Bebêminhada Solidária" onerror="this.style.display='none'" class="reveal mx-auto mb-6 h-auto w-60 max-w-full object-contain sm:w-72 lg:mx-0">
+          <h1 class="reveal-delay mb-5 leading-[1]" style="font-size:clamp(2.2rem,5vw,3.8rem);letter-spacing:-.05em">Venha caminhar com a gente. Cada passo transforma.</h1>
+          <p class="reveal-delay max-w-xl" style="color:var(--body);font-size:19px;line-height:1.55">Uma caminhada em família, cheia de afeto e solidariedade, que ajuda mães e bebês acolhidos pela Associação Guadalupe.</p>
+          <div class="reveal-delay mt-6 flex flex-wrap gap-2">
+            <span class="chip"><i data-lucide="calendar" class="h-4 w-4" aria-hidden="true"></i>8 de novembro de 2026</span>
+            <span class="chip"><i data-lucide="clock" class="h-4 w-4" aria-hidden="true"></i>10h</span>
+            <span class="chip"><i data-lucide="map-pin" class="h-4 w-4" aria-hidden="true"></i>Praça Ulysses Guimarães · São José dos Campos</span>
+          </div>
+          <div class="reveal-delay mt-8 flex max-w-md flex-col gap-3">
+            <a href="https://app.desenvolvi.site/evento.html" class="cta-button cta-grande cta-inscricao"><i data-lucide="ticket" aria-hidden="true"></i>Faça sua inscrição, participe!</a>
+            <a href="#empresas" class="cta-button cta-grande cta-patrocinio"><i data-lucide="handshake" aria-hidden="true"></i>Apoie essa ideia, seja patrocinador!</a>
+          </div>
         </div>
         <div class="relative mx-auto w-full max-w-3xl">
           <div class="hero-orb absolute -right-4 -top-5 h-28 w-28 rounded-full bg-[#f58634]"></div>
@@ -90,45 +107,23 @@
           <div class="relative overflow-hidden rounded-[2rem] border-[7px] border-white bg-[#3b2a63] shadow-2xl" style="aspect-ratio:16/9">
             <iframe class="block h-full w-full" src="https://www.youtube.com/embed/P7JsvpRpujs?si=OCcNXbC5KYLSllEk" title="Veja como foi a 1ª edição da Bebêminhada" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen style="border:0"></iframe>
           </div>
-          <p class="mt-5 text-center text-sm font-medium" style="color:var(--body)">1ª edição · Famílias, parceiros e solidariedade na Praça do Aquarius, em São José dos Campos.</p>
+          <p class="mt-5 text-center text-sm font-medium" style="color:var(--body)">Veja como foi a 1ª edição, em outubro de 2025.</p>
         </div>
       </div>
     </section>
 
-    <!-- Causa -->
-    <section id="causa" class="section-anchor bg-[#3b2a63] py-20 lg:py-28">
-      <div class="mx-auto grid max-w-7xl gap-12 px-5 lg:grid-cols-2 lg:px-8">
-        <div>
-          <p class="eyebrow mb-5" style="color:var(--sage)">Nossa causa</p>
-          <h2 class="max-w-lg text-white">Uma rede de cuidado começa quando a gente caminha junto.</h2>
-          <p class="mt-8 max-w-xl" style="color:#f3ecfb;font-size:20px;line-height:1.55">Cada parceria ajuda a acolher mães e bebês em situação de vulnerabilidade.</p>
-        </div>
-        <div class="flex flex-col justify-center">
-          <div class="flex flex-col gap-7 rounded-[1.5rem] p-7 sm:flex-row sm:items-center sm:justify-between" style="background:var(--cream)">
-            <div class="min-w-0 flex-1">
-              <p class="text-xs font-bold uppercase" style="color:var(--terra);letter-spacing:.15rem">Em benefício de</p>
-              <h3 class="mt-3" style="font-size:19px">ASSOCIAÇÃO GUADALUPE</h3>
-              <p class="mt-3" style="color:var(--body);line-height:1.5">Uma parceria que faz o cuidado chegar mais longe.</p>
-              <a href="http://associacaoguadalupe.org.br/" target="_blank" rel="noopener noreferrer" class="mt-5 inline-flex font-bold underline decoration-2 underline-offset-4" style="color:var(--terra)">Conheça a Associação Guadalupe</a>
-            </div>
-            <!-- Coloque o arquivo em img/guadalupe.png -->
-            <figure class="shrink-0 self-center overflow-hidden rounded-[1.25rem] sm:w-40 m-0">
-              <img src="Guadalupe.png" alt="Imagem em formato de coração com gestante e símbolo de pegada azul." onerror="this.parentElement.style.display='none'" class="h-40 w-full object-contain sm:h-44">
-            </figure>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Experiência -->
-    <section id="experiencia" class="section-anchor py-20 lg:py-28">
+    <!-- ============ O QUE É A BEBÊMINHADA ============ -->
+    <section id="evento" class="section-anchor py-20 lg:py-28">
       <div class="mx-auto max-w-7xl px-5 lg:px-8">
-        <div class="grid gap-8 lg:grid-cols-[.8fr_1.2fr]">
+        <div class="grid gap-8 lg:grid-cols-[.9fr_1.1fr]">
           <div>
-            <p class="eyebrow mb-5" style="color:var(--terra)">A experiência</p>
-            <h2>Um encontro para viver junto.</h2>
+            <p class="eyebrow mb-5" style="color:var(--terra)">O que é a Bebêminhada</p>
+            <h2>Uma manhã para caminhar, brincar e fazer o bem.</h2>
           </div>
-          <p class="max-w-2xl self-end" style="color:var(--body);font-size:18px;line-height:1.6">Uma manhã desenhada para brincar, descobrir e estar junto. A programação combina movimento, afeto e oportunidades naturais de interação entre marcas e famílias.</p>
+          <div class="self-end">
+            <p class="lead">A <strong>Bebêminhada Solidária</strong> é um encontro de famílias em forma de caminhada: bebês, crianças, mães, pais, avós e amigos, cada um no seu ritmo, juntos por uma causa.</p>
+            <p class="lead mt-4">Quem participa vive uma manhã leve e divertida e, ao mesmo tempo, ajuda a acolher mães e bebês em situação de vulnerabilidade. Tudo o que é arrecadado vai para a <strong>Associação Guadalupe</strong>.</p>
+          </div>
         </div>
         <div class="mt-12 grid gap-5 md:grid-cols-3">
           <article class="soft-card lift-card rounded-[1.5rem] bg-white p-7">
@@ -150,101 +145,202 @@
       </div>
     </section>
 
-    <!-- Visibilidade -->
-    <section id="visibilidade" class="section-anchor bg-[#fff3d1] py-20 lg:py-28">
-      <div class="mx-auto max-w-7xl px-5 lg:px-8">
-        <div class="max-w-2xl">
-          <p class="eyebrow mb-5" style="color:var(--terra)">Jornada de visibilidade</p>
-          <h2>Presença que acompanha toda a história.</h2>
+    <!-- ============ A CAUSA ============ -->
+    <section id="causa" class="section-anchor bg-[#3b2a63] py-20 lg:py-28">
+      <div class="mx-auto grid max-w-7xl gap-12 px-5 lg:grid-cols-2 lg:px-8">
+        <div>
+          <p class="eyebrow mb-5" style="color:var(--sage)">Nossa causa</p>
+          <h2 class="max-w-lg text-white">Uma rede de cuidado começa quando a gente caminha junto.</h2>
+          <p class="mt-8 max-w-xl" style="color:#f3ecfb;font-size:20px;line-height:1.55">Cada inscrição e cada parceria ajudam a acolher mães e bebês em situação de vulnerabilidade.</p>
+          <p class="mt-5 max-w-xl" style="color:#f3ecfb;font-size:18px;line-height:1.6">Na 1ª edição, o valor arrecadado contribuiu para a finalização do novo prédio destinado às gestantes atendidas pela Guadalupe. A primeira caminhada já mostrou o tamanho dessa transformação.</p>
         </div>
-        <div class="mt-14 grid gap-6 lg:grid-cols-3">
-          <article class="relative border-l border-[#3b2a6333] pl-7 lg:border-l-0 lg:border-t lg:pl-0 lg:pt-7">
-            <span class="timeline-dot absolute -left-2 top-0 h-4 w-4 rounded-full bg-[#f58634] lg:-top-2 lg:left-0"></span>
-            <p class="eyebrow" style="color:var(--terra);letter-spacing:.15rem">Antes</p>
-            <h3 class="mt-3" style="font-size:19px">Criar expectativa</h3>
-            <ul class="mt-5 space-y-3 list-none p-0" style="color:var(--body)"><li>• Publicações pré-evento</li><li>• Divulgação das inscrições</li></ul>
-          </article>
-          <article class="relative border-l border-[#3b2a6333] pl-7 lg:border-l-0 lg:border-t lg:pl-0 lg:pt-7">
-            <span class="timeline-dot absolute -left-2 top-0 h-4 w-4 rounded-full bg-[#7ac143] lg:-top-2 lg:left-0"></span>
-            <p class="eyebrow" style="color:#4f8f1f;letter-spacing:.15rem">Durante</p>
-            <h3 class="mt-3" style="font-size:19px">Viver a experiência</h3>
-            <ul class="mt-5 space-y-3 list-none p-0" style="color:var(--body)"><li>• Presença e ativação da marca</li><li>• Brindes, fotos e vídeos</li></ul>
-          </article>
-          <article class="relative border-l border-[#3b2a6333] pl-7 lg:border-l-0 lg:border-t lg:pl-0 lg:pt-7">
-            <span class="timeline-dot absolute -left-2 top-0 h-4 w-4 rounded-full bg-[#3b2a63] lg:-top-2 lg:left-0"></span>
-            <p class="eyebrow" style="color:var(--ink);letter-spacing:.15rem">Depois</p>
-            <h3 class="mt-3" style="font-size:19px">Permanecer na memória</h3>
-            <ul class="mt-5 space-y-3 list-none p-0" style="color:var(--body)"><li>• Publicações pós-evento</li><li>• Agradecimentos e registros da ação</li></ul>
-          </article>
+        <div class="flex flex-col justify-center gap-5">
+          <div class="flex flex-col gap-7 rounded-[1.5rem] p-7 sm:flex-row sm:items-center sm:justify-between" style="background:var(--cream)">
+            <div class="min-w-0 flex-1">
+              <p class="text-xs font-bold uppercase" style="color:var(--terra);letter-spacing:.15rem">Em benefício de</p>
+              <h3 class="mt-3" style="font-size:19px">ASSOCIAÇÃO GUADALUPE</h3>
+              <p class="mt-3" style="color:var(--body);line-height:1.5">Uma parceria que faz o cuidado chegar mais longe.</p>
+              <a href="http://associacaoguadalupe.org.br/" target="_blank" rel="noopener noreferrer" class="mt-5 inline-flex font-bold underline decoration-2 underline-offset-4" style="color:var(--terra)">Conheça a Associação Guadalupe</a>
+            </div>
+            <figure class="shrink-0 self-center overflow-hidden rounded-[1.25rem] sm:w-40 m-0">
+              <img src="Guadalupe.png" alt="Imagem em formato de coração com gestante e símbolo de pegada azul." onerror="this.parentElement.style.display='none'" class="h-40 w-full object-contain sm:h-44">
+            </figure>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="rounded-[1.35rem] p-6" style="background:var(--coral)">
+              <p class="m-0 font-bold text-white" style="font-size:48px;letter-spacing:-.05em">18</p>
+              <p class="mt-1 text-[11px] font-bold uppercase text-white" style="letter-spacing:.12rem">Patrocinadores na 1ª edição</p>
+            </div>
+            <div class="rounded-[1.35rem] p-6" style="background:var(--sage)">
+              <p class="m-0 font-bold" style="font-size:48px;letter-spacing:-.05em">15</p>
+              <p class="mt-1 text-[11px] font-bold uppercase" style="letter-spacing:.12rem">Parceiros na 1ª edição</p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Patrocínio -->
-    <section id="patrocinio" class="section-anchor py-20 lg:py-28">
+    <!-- ============ PARTICIPE (PÚBLICO) ============ -->
+    <section id="participe" class="section-anchor py-20 lg:py-28">
       <div class="mx-auto max-w-7xl px-5 lg:px-8">
         <div class="mx-auto max-w-3xl text-center">
-          <p class="eyebrow mb-5" style="color:var(--terra)">Cotas de patrocínio</p>
-          <h2>Uma causa que também pode ser a sua.</h2>
-          <p class="mt-5" style="color:var(--body);line-height:1.6">Escolha o nível de presença ideal para a sua marca. Todas as cotas conectam sua empresa à causa. As entregas ampliam conforme o nível de visibilidade e interação.</p>
+          <p class="eyebrow mb-5" style="color:var(--terra)">Participe</p>
+          <h2>Chame a família, os amigos e venha caminhar com a gente!</h2>
+          <p class="lead mt-5">Faça sua inscrição, garanta o kit da Bebêminhada e transforme uma manhã de domingo em ajuda de verdade para quem mais precisa.</p>
+          <div id="contagem" class="mt-6 hidden"><span class="chip"><i data-lucide="timer" class="h-4 w-4" aria-hidden="true"></i><span id="contagem-texto"></span></span></div>
         </div>
-        <div class="soft-card mt-12 overflow-x-auto rounded-[1.5rem]">
-          <table id="tabela" class="w-full min-w-[680px] border-collapse text-left">
-            <thead>
-              <tr class="bg-[#3b2a63] text-white">
-                <th class="px-5 py-4 font-semibold">ENTREGAS</th>
-                <th class="px-5 py-4 font-semibold">OURO</th>
-                <th class="px-5 py-4 font-semibold">PRATA</th>
-                <th class="px-5 py-4 font-semibold">BRONZE</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
+
+        <!-- Duas formas de participar -->
+        <div class="mx-auto mt-12 grid max-w-5xl gap-6 md:grid-cols-2">
+          <article class="soft-card flex flex-col rounded-[1.75rem] p-8" style="background:var(--sand);border-color:#f5863466">
+            <div class="mb-6 inline-flex w-fit rounded-full bg-[#f5863433] p-3 text-[#d9611a]"><i data-lucide="gift" aria-hidden="true"></i></div>
+            <p class="eyebrow" style="color:var(--terra)">Kit Solidário · R$ 60,00</p>
+            <h3 class="mt-2" style="font-size:24px">Vista essa causa</h3>
+            <p class="mt-3" style="color:var(--body);line-height:1.55">Garanta seu kit oficial por <strong>R$ 60,00</strong>, com:</p>
+            <ul class="mt-3 flex-1 space-y-1 list-none p-0" style="color:var(--body);line-height:1.5"><li>• Camiseta Dry Fit</li><li>• Ecobag com brindes e vouchers</li><li>• Garrafinha de água</li></ul>
+            <p class="mt-3" style="color:var(--body);line-height:1.55">Adquirindo o kit você ajuda a fortalecer o trabalho da Associação Guadalupe e torna esse movimento do bem ainda maior.</p>
+            <a href="https://app.desenvolvi.site/evento.html?tipo=doador" class="cta-button cta-grande cta-inscricao mt-6">Quero meu kit solidário</a>
+          </article>
+          <article class="soft-card flex flex-col rounded-[1.75rem] bg-white p-8">
+            <div class="mb-6 inline-flex w-fit rounded-full bg-[#7ac14366] p-3 text-[#3b2a63]"><i data-lucide="footprints" aria-hidden="true"></i></div>
+            <p class="eyebrow" style="color:#4f8f1f">Participação gratuita</p>
+            <h3 class="mt-2" style="font-size:24px">Caminhe pelo bem</h3>
+            <p class="mt-3 flex-1" style="color:var(--body);line-height:1.55">A participação é gratuita, mas a inscrição é importante para que a organização do evento possa planejar tudo com muito carinho para você e toda sua família.<br><strong>Não inclui o kit.</strong></p>
+            <a href="https://app.desenvolvi.site/evento.html?tipo=apoiador" class="cta-button cta-grande cta-inscricao mt-6">Quero me inscrever</a>
+          </article>
+        </div>
+
+        <!-- Como funciona -->
+        <div class="mx-auto mt-16 grid max-w-5xl gap-6 md:grid-cols-3">
+          <div class="text-center md:text-left">
+            <span class="inline-flex h-10 w-10 items-center justify-center rounded-full text-lg font-bold text-white" style="background:var(--coral)">1</span>
+            <h3 class="mt-3" style="font-size:19px">Faça a inscrição</h3>
+            <p class="mt-2" style="color:var(--body);line-height:1.5">Preencha seus dados e dos acompanhantes em poucos minutos.</p>
+          </div>
+          <div class="text-center md:text-left">
+            <span class="inline-flex h-10 w-10 items-center justify-center rounded-full text-lg font-bold text-white" style="background:var(--sage)">2</span>
+            <h3 class="mt-3" style="font-size:19px">Escolha seu kit e doe</h3>
+            <p class="mt-2" style="color:var(--body);line-height:1.5">Quem quiser o kit escolhe o tamanho e paga com segurança pela internet.</p>
+          </div>
+          <div class="text-center md:text-left">
+            <span class="inline-flex h-10 w-10 items-center justify-center rounded-full text-lg font-bold text-white" style="background:var(--ink)">3</span>
+            <h3 class="mt-3" style="font-size:19px">Receba o ingresso</h3>
+            <p class="mt-2" style="color:var(--body);line-height:1.5">O ingresso com QR Code chega no seu e-mail. É só apresentá-lo no dia.</p>
+          </div>
+        </div>
+
+        <!-- Onde e quando -->
+        <div class="mx-auto mt-16 flex max-w-5xl flex-col items-start justify-between gap-6 rounded-[1.75rem] p-8 sm:flex-row sm:items-center" style="background:var(--ink)">
+          <div class="text-white">
+            <p class="eyebrow" style="color:var(--sage)">Onde e quando</p>
+            <p class="mt-2 text-xl font-bold">Domingo, 8 de novembro de 2026, às 10h</p>
+            <p class="mt-1" style="color:#f3ecfb">Praça Ulysses Guimarães, Parque Res. Aquarius · São José dos Campos – SP</p>
+          </div>
+          <a href="https://www.google.com/maps/search/?api=1&query=Pra%C3%A7a+Ulysses+Guimar%C3%A3es+Parque+Residencial+Aquarius+S%C3%A3o+Jos%C3%A9+dos+Campos" target="_blank" rel="noopener noreferrer" class="cta-button shrink-0" style="background:#fff;color:var(--ink)"><i data-lucide="map-pin" aria-hidden="true"></i>Ver no mapa</a>
         </div>
       </div>
     </section>
 
-    <!-- Resultados -->
-    <section class="bg-[#f58634] py-20 lg:py-28">
+    <!-- ============ PARA EMPRESAS E PROFISSIONAIS ============ -->
+    <section id="empresas" class="section-anchor bg-[#3b2a63] py-20 lg:py-28">
       <div class="mx-auto max-w-7xl px-5 lg:px-8">
-        <p class="eyebrow text-white" style="letter-spacing:.16rem">1ª edição · Outubro de 2025</p>
-        <div class="mt-7 grid gap-10 lg:grid-cols-[1fr_1.1fr]">
-          <div>
-            <h2 class="text-white">Solidariedade que virou estrutura</h2>
-            <p class="mt-5 max-w-xl" style="color:#fff3e6;font-size:18px;line-height:1.6">O valor arrecadado contribuiu para a finalização do novo prédio destinado às gestantes atendidas pela Guadalupe.</p>
-          </div>
-          <div class="grid grid-cols-2 gap-4 self-start">
-            <div class="rounded-[1.35rem] p-6" style="background:var(--cream)">
-              <p class="m-0 font-bold" style="font-size:52px;letter-spacing:-.05em">18</p>
-              <p class="mt-2 text-[11px] font-bold uppercase" style="color:var(--terra);letter-spacing:.12rem">Patrocinadores</p>
-            </div>
-            <div class="rounded-[1.35rem] p-6" style="background:var(--ink)">
-              <p class="m-0 font-bold text-white" style="font-size:52px;letter-spacing:-.05em">15</p>
-              <p class="mt-2 text-[11px] font-bold uppercase" style="color:#e6f3d6;letter-spacing:.12rem">Parceiros</p>
-            </div>
+        <div class="mx-auto max-w-3xl text-center">
+          <p class="eyebrow mb-5" style="color:var(--sage)">Para empresas e profissionais</p>
+          <h2 class="text-white">Sua marca no centro de uma causa que as famílias vão lembrar.</h2>
+          <p class="mt-5" style="color:#f3ecfb;font-size:18px;line-height:1.6">Seja protagonista da Bebêminhada: patrocine, esteja presente no evento, conecte-se com centenas de famílias da região e deixe sua marca ligada a uma ação que transforma vidas.</p>
+        </div>
+
+        <!-- Por que patrocinar -->
+        <div class="mt-12 grid gap-5 md:grid-cols-3">
+          <article class="rounded-[1.5rem] bg-white p-7">
+            <div class="mb-6 inline-flex rounded-full bg-[#f5863424] p-3 text-[#d9611a]"><i data-lucide="megaphone" aria-hidden="true"></i></div>
+            <h3 style="font-size:19px">Visibilidade de verdade</h3>
+            <p class="mt-3" style="color:var(--body);line-height:1.55">Logo nas camisetas e nos kits, backdrop, menções durante o evento e divulgação nas redes.</p>
+          </article>
+          <article class="rounded-[1.5rem] bg-white p-7">
+            <div class="mb-6 inline-flex rounded-full bg-[#7ac14366] p-3 text-[#3b2a63]"><i data-lucide="users" aria-hidden="true"></i></div>
+            <h3 style="font-size:19px">Contato direto com famílias</h3>
+            <p class="mt-3" style="color:var(--body);line-height:1.55">Espaço para ativação da sua marca, brindes nos kits e interação natural com o público.</p>
+          </article>
+          <article class="rounded-[1.5rem] bg-white p-7">
+            <div class="mb-6 inline-flex rounded-full bg-[#3b2a631c] p-3 text-[#3b2a63]"><i data-lucide="heart-handshake" aria-hidden="true"></i></div>
+            <h3 style="font-size:19px">Impacto social real</h3>
+            <p class="mt-3" style="color:var(--body);line-height:1.55">Seu patrocínio ajuda a acolher mães e bebês atendidos pela Associação Guadalupe.</p>
+          </article>
+        </div>
+
+        <!-- Jornada de visibilidade -->
+        <div class="mt-20">
+          <p class="eyebrow mb-4" style="color:var(--sage)">Jornada de visibilidade</p>
+          <h3 class="text-white" style="font-size:clamp(1.4rem,2.6vw,1.9rem);letter-spacing:-.03em">Presença que acompanha toda a história.</h3>
+          <div class="mt-12 grid gap-6 lg:grid-cols-3">
+            <article class="relative border-l border-[#ffffff40] pl-7 lg:border-l-0 lg:border-t lg:pl-0 lg:pt-7">
+              <span class="timeline-dot absolute -left-2 top-0 h-4 w-4 rounded-full bg-[#f58634] lg:-top-2 lg:left-0"></span>
+              <p class="eyebrow" style="color:#ffb27a;letter-spacing:.15rem">Antes</p>
+              <h3 class="mt-3 text-white" style="font-size:19px">Criar expectativa</h3>
+              <ul class="mt-5 space-y-3 list-none p-0" style="color:#f3ecfb"><li>• Publicações pré-evento</li><li>• Divulgação das inscrições</li></ul>
+            </article>
+            <article class="relative border-l border-[#ffffff40] pl-7 lg:border-l-0 lg:border-t lg:pl-0 lg:pt-7">
+              <span class="timeline-dot absolute -left-2 top-0 h-4 w-4 rounded-full bg-[#7ac143] lg:-top-2 lg:left-0"></span>
+              <p class="eyebrow" style="color:#a8dd7a;letter-spacing:.15rem">Durante</p>
+              <h3 class="mt-3 text-white" style="font-size:19px">Viver a experiência</h3>
+              <ul class="mt-5 space-y-3 list-none p-0" style="color:#f3ecfb"><li>• Presença e ativação da marca</li><li>• Brindes, fotos e vídeos</li></ul>
+            </article>
+            <article class="relative border-l border-[#ffffff40] pl-7 lg:border-l-0 lg:border-t lg:pl-0 lg:pt-7">
+              <span class="timeline-dot absolute -left-2 top-0 h-4 w-4 rounded-full bg-[#cc66ff] lg:-top-2 lg:left-0"></span>
+              <p class="eyebrow" style="color:#e2a8ff;letter-spacing:.15rem">Depois</p>
+              <h3 class="mt-3 text-white" style="font-size:19px">Permanecer na memória</h3>
+              <ul class="mt-5 space-y-3 list-none p-0" style="color:#f3ecfb"><li>• Publicações pós-evento</li><li>• Agradecimentos e registros da ação</li></ul>
+            </article>
           </div>
         </div>
-        <p class="mt-12 max-w-2xl border-l-2 border-white pl-5 text-lg font-medium leading-relaxed text-white">A primeira caminhada já mostrou o tamanho dessa transformação.</p>
+
+        <!-- Cotas -->
+        <div class="mt-20">
+          <div class="mx-auto max-w-3xl text-center">
+            <p class="eyebrow mb-4" style="color:var(--sage)">Cotas de patrocínio</p>
+            <h3 class="text-white" style="font-size:clamp(1.4rem,2.6vw,1.9rem);letter-spacing:-.03em">Escolha o nível de presença ideal para a sua marca.</h3>
+            <p class="mt-4" style="color:#f3ecfb;line-height:1.6">Todas as cotas conectam sua empresa à causa. As entregas ampliam conforme o nível de visibilidade e interação.</p>
+          </div>
+          <div class="mt-10 overflow-x-auto rounded-[1.5rem] bg-white shadow-xl">
+            <table id="tabela" class="w-full min-w-[680px] border-collapse text-left">
+              <thead>
+                <tr class="text-white" style="background:var(--coral)">
+                  <th class="px-5 py-4 font-semibold">ENTREGAS</th>
+                  <th class="px-5 py-4 font-semibold">OURO</th>
+                  <th class="px-5 py-4 font-semibold">PRATA</th>
+                  <th class="px-5 py-4 font-semibold">BRONZE</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="mt-10 text-center">
+            <a href="https://wa.me/5512992009404?text=Quero%20contribuir%20com%20a%20Beb%C3%AAminhada%202026%20sendo%20um%20patrocinador" target="_blank" rel="noopener noreferrer" class="cta-button cta-grande cta-inscricao"><i data-lucide="handshake" aria-hidden="true"></i>Quero ser patrocinador, falar com a equipe</a>
+            <p class="mt-4" style="color:#f3ecfb">Ou ligue: <a href="tel:+5512992009404" class="font-bold text-white underline underline-offset-4">(12) 9 9200-9404</a></p>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- Contato -->
-    <section id="contato" class="section-anchor px-5 pb-20 lg:px-8 lg:pb-28">
-      <div class="mx-auto max-w-7xl overflow-hidden rounded-[2rem] px-7 py-14 text-center sm:px-12 lg:py-20" style="background:var(--ink)">
-        <p class="eyebrow" style="color:var(--sage)">Convite à parceria</p>
-        <h2 class="mx-auto mt-5 max-w-3xl text-white">Faça parte de uma história que as famílias vão lembrar.</h2>
-        <p class="mx-auto mt-6 max-w-2xl" style="color:#f3ecfb;font-size:19px;line-height:1.55">Cada passo conta. Cada família transforma. Juntos, fazemos a diferença.</p>
-        <a href="https://wa.me/5512992009404?text=Quero%20contribuir%20com%20a%20Beb%C3%AAminhada%202026%20sendo%20um%20patrocinador" target="_blank" rel="noopener noreferrer" class="cta-button mt-9" style="background:var(--coral)">Seja um patrocinador</a>
-        <p class="mt-5 font-medium" style="color:var(--sage)">Fale com a nossa equipe</p>
-        <a href="tel:+5512992009404" class="mt-1 inline-block text-[19px] font-bold text-white">(12) 9 9200-9404</a>
+    <!-- ============ CONVITE FINAL ============ -->
+    <section id="contato" class="section-anchor px-5 py-20 lg:px-8 lg:py-28">
+      <div class="mx-auto max-w-7xl text-center">
+        <p class="eyebrow" style="color:var(--terra)">Faça parte</p>
+        <h2 class="mx-auto mt-5 max-w-3xl">Faça parte de uma história que as famílias vão lembrar.</h2>
+        <p class="mx-auto mt-6 max-w-2xl" style="color:var(--body);font-size:19px;line-height:1.55">Cada passo conta. Cada família transforma. Juntos, fazemos a diferença.</p>
+        <div class="mx-auto mt-9 flex max-w-2xl flex-col gap-3 sm:flex-row sm:justify-center">
+          <a href="https://app.desenvolvi.site/evento.html" class="cta-button cta-grande cta-inscricao sm:flex-1"><i data-lucide="ticket" aria-hidden="true"></i>Faça sua inscrição, participe!</a>
+          <a href="#empresas" class="cta-button cta-grande cta-patrocinio sm:flex-1"><i data-lucide="handshake" aria-hidden="true"></i>Apoie essa ideia, seja patrocinador!</a>
+        </div>
       </div>
     </section>
   </main>
 
   <footer class="border-t border-[#3b2a6320] px-5 py-8 lg:px-8">
     <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
-      <p class="m-0 font-bold">Bebêminhada Solidária 2026</p>
-      <p class="m-0" style="color:var(--body)">Associação Guadalupe</p>
+      <p class="m-0 font-bold">Bebêminhada Solidária 2026 · 8 de novembro, 10h</p>
+      <p class="m-0" style="color:var(--body)">Em benefício da Associação Guadalupe</p>
       <a href="#topo" class="font-bold underline decoration-2 underline-offset-4" style="color:var(--terra)">Voltar ao topo</a>
     </div>
   </footer>
@@ -265,10 +361,21 @@
     ["Registro fotográfico",        1, 1, 1],
   ];
   const tbody = document.querySelector("#tabela tbody");
-  const td = (t) => `<td class="px-5 py-4">${t}</td>`;
+  const td = (t) => `<td class="px-5 py-4" style="color:var(--ink)">${t}</td>`;
   tbody.innerHTML =
-    `<tr><th class="px-5 py-4 font-bold">Investimento</th>${["R$ 1.500","R$ 1.000","R$ 500"].map(p => `<td class="px-5 py-4 font-bold">${p}</td>`).join("")}</tr>` +
-    linhas.map(([nome, ...v]) => `<tr><th class="px-5 py-4 font-medium">${nome}</th>${v.map(x => td(x ? "✓" : "—")).join("")}</tr>`).join("");
+    `<tr><th class="px-5 py-4 font-bold" style="color:var(--ink)">Investimento</th>${["R$ 1.500","R$ 1.000","R$ 500"].map(p => `<td class="px-5 py-4 font-bold" style="color:var(--ink)">${p}</td>`).join("")}</tr>` +
+    linhas.map(([nome, ...v]) => `<tr><th class="px-5 py-4 font-medium" style="color:var(--ink)">${nome}</th>${v.map(x => td(x ? "✓" : "—")).join("")}</tr>`).join("");
+
+  // Contagem regressiva até o evento (8/11/2026, 10h, horário de Brasília)
+  (function () {
+    const alvo = new Date("2026-11-08T10:00:00-03:00");
+    const dias = Math.ceil((alvo - new Date()) / 86400000);
+    const box = document.getElementById("contagem");
+    const txt = document.getElementById("contagem-texto");
+    if (dias > 1) { txt.textContent = "Faltam " + dias + " dias para a Bebêminhada!"; box.classList.remove("hidden"); }
+    else if (dias === 1) { txt.textContent = "É amanhã! Vamos caminhar juntos?"; box.classList.remove("hidden"); }
+    else if (dias === 0) { txt.textContent = "É hoje! Nos vemos às 10h na praça."; box.classList.remove("hidden"); }
+  })();
 
   document.addEventListener("DOMContentLoaded", () => {
     lucide.createIcons();
