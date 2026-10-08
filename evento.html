@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<!-- v.2.6.0 — Página pública ENXUTA do evento (Bebêminhada Solidária). Só embrulha, em tela cheia, a inscrição
+     e o ingresso do Apps Script: sem PWA, sem service worker, sem botão de instalar, sem identidade por unidade.
+     Endereços: https://app.desenvolvi.site/evento.html  (abre a inscrição)
+                https://app.desenvolvi.site/evento.html?page=ingresso&t=TOKEN  (abre o ingresso — é o link do e-mail e do checkout)
+     O home.html redireciona para cá os links antigos ?page=inscricao e ?page=ingresso. -->
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bebêminhada Solidária 2026 — Inscrição</title>
+  <meta name="description" content="Participe da Bebêminhada Solidária 2026 em benefício da Associação Guadalupe. Faça sua inscrição.">
+  <meta property="og:title" content="Bebêminhada Solidária 2026 — Inscrição">
+  <meta property="og:description" content="Uma caminhada que conecta famílias, marcas e solidariedade. Faça sua inscrição!">
+  <meta name="theme-color" content="#fffdf7">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #fffdf7; font-family: "DM Sans", "Segoe UI", system-ui, sans-serif; color: #3b2a63; }
+    #evento-iframe { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; display: block; background: #fffdf7; }
+
+    /* Tela de espera: o Apps Script leva alguns segundos para abrir; some quando o conteúdo carrega. */
+    #espera { position: fixed; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: #fffdf7; text-align: center; padding: 24px; transition: opacity .25s ease; }
+    #espera.fim { opacity: 0; pointer-events: none; }
+    #espera .faixa { position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, #ffc928 0 20%, #f58634 20% 40%, #2f9bd8 40% 60%, #7ac143 60% 80%, #cc66ff 80%); }
+    #espera .giro { width: 34px; height: 34px; border-radius: 50%; border: 4px solid rgba(245, 134, 52, .25); border-top-color: #f58634; animation: girar .9s linear infinite; }
+    #espera p { font-size: 15px; color: #4a4458; }
+    #espera a { color: #d9611a; font-weight: 700; }
+    #espera .lento { display: none; font-size: 13.5px; }
+    #espera.demora .lento { display: block; }
+    @keyframes girar { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { #espera .giro { animation-duration: 3s; } }
+  </style>
+</head>
+<body>
+  <div id="espera" role="status" aria-live="polite">
+    <div class="faixa"></div>
+    <div class="giro" aria-hidden="true"></div>
+    <p>Carregando a inscrição...</p>
+    <p class="lento">Está demorando mais que o normal. <a id="abrir-direto" href="#" target="_top">Toque aqui para abrir em outra página</a>.</p>
+  </div>
+
+  <iframe id="evento-iframe" title="Bebêminhada Solidária 2026 — Inscrição" allow="clipboard-write; web-share"></iframe>
+
+  <script>
+    (function () {
+      // Endereço publicado do Apps Script (o mesmo do home.html).
+      var URL_BASE_EXEC = "https://script.google.com/macros/s/AKfycbytQm1L6r_0wrZM1mXiTO2HFM_DAfd2tDEF6h7OVxYS0xWfUG5j0y_zGVz-zOLyT1w-/exec";
+
+      // Só estas páginas abrem por aqui; qualquer outra coisa cai na inscrição.
+      var PAGINAS = { inscricao: true, ingresso: true };
+      // Só estes parâmetros seguem para o Apps Script: o token do ingresso (t) e o que a InfinitePay devolve na URL de
+      // retorno do pagamento (o ingresso usa order_nsu, transaction_nsu e slug para confirmar o pagamento).
+      var PERMITIDOS = ["t", "order_nsu", "transaction_nsu", "slug", "invoice_slug"];
+
+      var entrada = new URLSearchParams(window.location.search);
+      var pagina = String(entrada.get("page") || "").toLowerCase();
+      if (!PAGINAS[pagina]) pagina = "inscricao";
+
+      var saida = new URLSearchParams();
+      saida.set("page", pagina);
+      PERMITIDOS.forEach(function (chave) {
+        var v = entrada.get(chave);
+        if (v !== null && v.length <= 400) saida.set(chave, v);
+      });
+      var destino = URL_BASE_EXEC + "?" + saida.toString();
+
+      var iframe = document.getElementById("evento-iframe");
+      var espera = document.getElementById("espera");
+      document.getElementById("abrir-direto").href = destino;
+
+      // Se o Apps Script travar (9 s sem carregar), a tela de espera oferece abrir direto.
+      var avisoDemora = setTimeout(function () { espera.classList.add("demora"); }, 9000);
+      iframe.addEventListener("load", function () { clearTimeout(avisoDemora); espera.classList.add("fim"); });
+      iframe.src = destino;
+    })();
+  </script>
+</body>
+</html>
