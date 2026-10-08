@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v.2.6.0 — Página pública ENXUTA do evento (Bebêminhada Solidária). Só embrulha, em tela cheia, a inscrição
+<!-- v.2.6.1 — Página pública ENXUTA do evento (Bebêminhada Solidária). Só embrulha, em tela cheia, a inscrição
      e o ingresso do Apps Script: sem PWA, sem service worker, sem botão de instalar, sem identidade por unidade.
      Endereços: https://app.desenvolvi.site/evento.html  (abre a inscrição)
                 https://app.desenvolvi.site/evento.html?page=ingresso&t=TOKEN  (abre o ingresso — é o link do e-mail e do checkout)
@@ -51,6 +51,7 @@
       // Só estes parâmetros seguem para o Apps Script: o token do ingresso (t) e o que a InfinitePay devolve na URL de
       // retorno do pagamento (o ingresso usa order_nsu, transaction_nsu e slug para confirmar o pagamento).
       var PERMITIDOS = ["t", "order_nsu", "transaction_nsu", "slug", "invoice_slug"];
+      // ?tipo=apoiador (gratuito) ou ?tipo=doador (kit): a inscrição já abre no tipo escolhido no site. Só estes 2 valores passam.
 
       var entrada = new URLSearchParams(window.location.search);
       var pagina = String(entrada.get("page") || "").toLowerCase();
@@ -58,6 +59,8 @@
 
       var saida = new URLSearchParams();
       saida.set("page", pagina);
+      var tipo = String(entrada.get("tipo") || "").toLowerCase();
+      if (pagina === "inscricao" && (tipo === "apoiador" || tipo === "doador")) saida.set("tipo", tipo);
       PERMITIDOS.forEach(function (chave) {
         var v = entrada.get(chave);
         if (v !== null && v.length <= 400) saida.set(chave, v);
