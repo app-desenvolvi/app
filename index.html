@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>AppDesenvolVi</title>
 
+  <!-- 🎟️ Links do evento (?page=inscricao e ?page=ingresso) vão para a página enxuta evento.html, sem PWA nem os
+       outros recursos do app. Fica no topo para redirecionar antes de qualquer outra coisa carregar. -->
+  <script>
+    (function () {
+      var p = (new URLSearchParams(window.location.search).get('page') || '').toLowerCase();
+      if (p === 'inscricao' || p === 'ingresso') window.location.replace('evento.html' + window.location.search);
+    })();
+  </script>
+
   <!-- 🚀 Link para o manifesto PWA do seu próprio domínio -->
   <!-- O <link rel="manifest"> é escrito pelo script abaixo JÁ com o manifest da unidade (o Safari/iOS lê o
        manifest assim que a tag aparece no HTML; trocar o href depois não é considerado). -->
@@ -269,6 +278,23 @@
     allow="clipboard-write; camera">
   </iframe>
 
+  <!-- 📷 LEITOR DE QR-CODE (check-in do evento). A câmera NÃO funciona dentro do iframe do Apps Script (o Google não
+       libera), então o app pede e este leitor abre aqui, no topo da janela, e devolve o texto lido por postMessage. -->
+  <style>
+    #hm-scanner { display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(12, 12, 20, 0.96); flex-direction: column; align-items: center; justify-content: center; padding: 16px; color: #fff; }
+    #hm-scanner.aberto { display: flex; }
+    #hm-scanner h3 { font-size: 1.05rem; margin-bottom: 14px; text-align: center; }
+    #hm-leitor { width: min(92vw, 420px); border-radius: 16px; overflow: hidden; background: #000; min-height: 200px; }
+    #hm-scanner p { font-size: 0.85rem; opacity: 0.8; margin-top: 12px; text-align: center; max-width: 420px; }
+    #hm-scanner button { margin-top: 18px; border: 0; border-radius: 999px; padding: 12px 34px; font-size: 1rem; font-weight: 700; background: #fff; color: #222; cursor: pointer; }
+  </style>
+  <div id="hm-scanner" role="dialog" aria-modal="true" aria-label="Leitor de QR-Code">
+    <h3>Aponte a câmera para o QR-Code do ingresso</h3>
+    <div id="hm-leitor"></div>
+    <p id="hm-scanner-msg">Aguardando a câmera...</p>
+    <button type="button" onclick="fecharScannerQr_(true)">Cancelar</button>
+  </div>
+
   <!-- 🚀 BOTÃO FLUTUANTE DE INSTALAÇÃO -->
   <button id="pwa-install-btn" class="pwa-fab" onclick="abrirInstaladorPWA()">
     <i class="bi bi-phone-vibrate-fill"></i> Instalar App
@@ -334,6 +360,89 @@
       document.documentElement.style.setProperty('--cor-fundo-home', cor);
       var meta = document.getElementById('meta-theme-color');
       if (meta) meta.setAttribute('content', cor);
+    });
+
+    // 📷 PONTE DO LEITOR DE QR-CODE (tela "Check-in do evento" do app)
+    // O app (iframe → moldura do Apps Script → iframe interno) pede com {fonte:'desenvolvi-app', tipo:'evtAbrirScanner'}.
+    // Aqui, no topo da janela, a câmera é permitida. O resultado volta para o app por postMessage, difundido para
+    // todas as molduras dentro do iframe (o app está 2 ou 3 níveis abaixo e só ele reage a 'desenvolvi-home').
+    var scannerQr_ = null;
+
+    function difundirParaApp_(msg) {
+      function descer(janela, nivel) {
+        if (nivel > 4) return;
+        var n = 0;
+        try { n = janela.length; } catch (e) { return; }
+        for (var i = 0; i < n; i++) {
+          var filha;
+          try { filha = janela[i]; } catch (e) { continue; }
+          try { filha.postMessage(msg, '*'); } catch (e) {}
+          descer(filha, nivel + 1);
+        }
+      }
+      var ifr = document.getElementById('app-iframe');
+      if (!ifr || !ifr.contentWindow) return;
+      try { ifr.contentWindow.postMessage(msg, '*'); } catch (e) {}
+      descer(ifr.contentWindow, 0);
+    }
+
+    function fecharScannerQr_(avisar) {
+      var s = scannerQr_;
+      scannerQr_ = null;
+      document.getElementById('hm-scanner').classList.remove('aberto');
+      if (s) { s.stop().then(function() { try { s.clear(); } catch (e) {} }).catch(function() {}); }
+    }
+
+    function abrirScannerQr_() {
+      if (scannerQr_) return;
+      var painel = document.getElementById('hm-scanner');
+      var msg = document.getElementById('hm-scanner-msg');
+      msg.textContent = 'Aguardando a câmera...';
+      painel.classList.add('aberto');
+
+      function iniciar() {
+        if (typeof Html5Qrcode === 'undefined') {
+          msg.textContent = 'O leitor não carregou. Feche e use a busca por código, nome ou celular.';
+          difundirParaApp_({ fonte: 'desenvolvi-home', tipo: 'evtScannerErro', msg: 'O leitor de QR-Code não carregou.' });
+          return;
+        }
+        var leitor = new Html5Qrcode('hm-leitor');
+        scannerQr_ = leitor;
+        leitor.start(
+          { facingMode: 'environment' },
+          { fps: 10, qrbox: function(w, h) { var s = Math.floor(Math.min(w, h) * 0.7); return { width: s, height: s }; } },
+          function(texto) {
+            if (scannerQr_ !== leitor) return;       // já tratado
+            if (navigator.vibrate) navigator.vibrate(60);
+            fecharScannerQr_(false);
+            difundirParaApp_({ fonte: 'desenvolvi-home', tipo: 'evtQrLido', texto: String(texto || '').slice(0, 200) });
+          },
+          function() {}
+        ).then(function() {
+          msg.textContent = 'Posicione o QR-Code dentro do quadrado.';
+        }).catch(function(err) {
+          scannerQr_ = null;
+          var m = (err && err.message) ? err.message : String(err);
+          msg.textContent = 'Não foi possível abrir a câmera. Libere a permissão no navegador.';
+          difundirParaApp_({ fonte: 'desenvolvi-home', tipo: 'evtScannerErro', msg: m });
+          setTimeout(function() { fecharScannerQr_(false); }, 2500);
+        });
+      }
+
+      if (typeof Html5Qrcode !== 'undefined') { iniciar(); return; }
+      var sc = document.createElement('script');
+      sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js';
+      sc.onload = iniciar;
+      sc.onerror = iniciar;
+      document.head.appendChild(sc);
+    }
+
+    window.addEventListener('message', function(event) {
+      var origemValida = /\.googleusercontent\.com$/.test(event.origin) || event.origin === 'https://script.google.com';
+      if (!origemValida) return;
+      if (!event.data || event.data.fonte !== 'desenvolvi-app' || event.data.tipo !== 'evtAbrirScanner') return;
+      difundirParaApp_({ fonte: 'desenvolvi-home', tipo: 'evtScannerPronto' });   // avisa o app que a ponte existe
+      abrirScannerQr_();
     });
 
     // --- 1. REGISTRO DO SERVICE WORKER NO SEU PRÓPRIO DOMÍNIO ---
