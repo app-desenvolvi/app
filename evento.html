@@ -5,7 +5,8 @@
                 https://app.desenvolvi.site/evento.html?page=ingresso&t=TOKEN  (abre o ingresso — é o link do e-mail e do checkout)
      O home.html redireciona para cá os links antigos ?page=inscricao e ?page=ingresso.
      Navegadores embutidos (Instagram, Facebook, TikTok...) bloqueiam o Apps Script dentro da moldura e a tela fica branca:
-     neles a moldura NAO e carregada sozinha; aparece o aviso "Abra no navegador" (com opcao de tentar mesmo assim). -->
+     neles a moldura NAO e carregada sozinha; aparece o aviso "Abra no navegador" (com opcao de tentar mesmo assim, e entao
+     uma faixa "A tela ficou em branco?" volta ao aviso). Safari, Chrome e computador abrem a inscricao sem faixa nenhuma. -->
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -44,7 +45,7 @@
     #aviso .secundario { background: #fff; color: #3b2a63; border: 2px solid #f58634; }
     #aviso .terciario { background: none; border: 0; color: #4a4458; text-decoration: underline; font-weight: 600; }
     #aviso .copiado { display: none; color: #4f8f1f; font-weight: 700; font-size: 15px; }
-    /* Faixa discreta em celulares: leva ao aviso se a tela ficar em branco por outro motivo */
+    /* Faixa discreta: so aparece depois de "Tentar abrir aqui mesmo" em navegador embutido; volta ao aviso se a tela ficar em branco */
     #ajuda { position: fixed; left: 0; right: 0; bottom: 0; z-index: 3; display: none; text-align: center; padding: 6px 10px; font-size: 12.5px; background: rgba(255, 243, 209, .96); color: #3b2a63; border-top: 1px solid #f5863466; }
     body.com-ajuda #evento-iframe { height: calc(100% - 32px); }
     #ajuda button { font: inherit; background: none; border: 0; color: #d9611a; font-weight: 700; text-decoration: underline; cursor: pointer; }
@@ -137,11 +138,14 @@
         } else { window.prompt("Copie o link:", linkCopia); }
       }
       document.getElementById("aviso-copiar").addEventListener("click", copiarLink);
-      document.getElementById("aviso-tentar").addEventListener("click", carregar);
+      // "Tentar abrir aqui mesmo" (so existe em navegador embutido): carrega a inscricao e deixa a faixa "tela em branco?"
+      // disponivel, para voltar ao aviso se o Apps Script ficar em branco de novo.
+      document.getElementById("aviso-tentar").addEventListener("click", function () {
+        carregar();
+        if (pagina === "inscricao") { ajuda.style.display = "block"; document.body.classList.add("com-ajuda"); }
+      });
       document.getElementById("ajuda-abrir").addEventListener("click", mostrarAviso);
 
-      // Celulares: faixa pequena embaixo ("A tela ficou em branco? Toque aqui") para o caso de o aviso nao ter sido detectado.
-      if (navigator.maxTouchPoints > 0 && pagina === "inscricao") { ajuda.style.display = "block"; document.body.classList.add("com-ajuda"); }
       if (pagina === "ingresso") document.getElementById("aviso-titulo").textContent = "Para ver seu ingresso, abra no navegador do celular";
 
       if (embutido) { mostrarAviso(); } else { carregar(); }
