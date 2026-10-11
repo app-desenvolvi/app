@@ -3,7 +3,9 @@
      e o ingresso do Apps Script: sem PWA, sem service worker, sem botão de instalar, sem identidade por unidade.
      Endereços: https://app.desenvolvi.site/evento.html  (abre a inscrição)
                 https://app.desenvolvi.site/evento.html?page=ingresso&t=TOKEN  (abre o ingresso — é o link do e-mail e do checkout)
-     O home.html redireciona para cá os links antigos ?page=inscricao e ?page=ingresso. -->
+     O home.html redireciona para cá os links antigos ?page=inscricao e ?page=ingresso.
+     Navegadores embutidos (Instagram, Facebook, TikTok...) bloqueiam o Apps Script dentro da moldura e a tela fica branca:
+     neles a moldura NAO e carregada sozinha; aparece o aviso "Abra no navegador" (com opcao de tentar mesmo assim). -->
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -28,6 +30,24 @@
     #espera .lento { display: none; font-size: 13.5px; }
     #espera.demora .lento { display: block; }
     @keyframes girar { to { transform: rotate(360deg); } }
+
+    /* Aviso de navegador embutido (Instagram etc.) */
+    #aviso { position: fixed; inset: 0; z-index: 5; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: #fffdf7; text-align: center; padding: 24px; overflow-y: auto; }
+    #aviso.ativo { display: flex; }
+    #aviso .faixa { position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, #ffc928 0 20%, #f58634 20% 40%, #2f9bd8 40% 60%, #7ac143 60% 80%, #cc66ff 80%); }
+    #aviso h1 { font-size: 21px; line-height: 1.25; max-width: 24rem; }
+    #aviso p { font-size: 15px; line-height: 1.5; color: #4a4458; max-width: 24rem; }
+    #aviso .passos { background: #fff3d1; border: 2px solid #f58634; border-radius: 16px; padding: 14px 16px; text-align: left; max-width: 24rem; width: 100%; font-size: 15px; line-height: 1.5; color: #3b2a63; }
+    #aviso .passos strong { color: #d9611a; }
+    #aviso button { font: inherit; font-weight: 700; border-radius: 999px; padding: 13px 22px; cursor: pointer; width: 100%; max-width: 24rem; }
+    #aviso .principal { background: #f58634; color: #fff; border: 0; }
+    #aviso .secundario { background: #fff; color: #3b2a63; border: 2px solid #f58634; }
+    #aviso .terciario { background: none; border: 0; color: #4a4458; text-decoration: underline; font-weight: 600; }
+    #aviso .copiado { display: none; color: #4f8f1f; font-weight: 700; font-size: 15px; }
+    /* Faixa discreta em celulares: leva ao aviso se a tela ficar em branco por outro motivo */
+    #ajuda { position: fixed; left: 0; right: 0; bottom: 0; z-index: 3; display: none; text-align: center; padding: 6px 10px; font-size: 12.5px; background: rgba(255, 243, 209, .96); color: #3b2a63; border-top: 1px solid #f5863466; }
+    body.com-ajuda #evento-iframe { height: calc(100% - 32px); }
+    #ajuda button { font: inherit; background: none; border: 0; color: #d9611a; font-weight: 700; text-decoration: underline; cursor: pointer; }
     @media (prefers-reduced-motion: reduce) { #espera .giro { animation-duration: 3s; } }
   </style>
 </head>
@@ -38,6 +58,20 @@
     <p>Carregando a inscrição...</p>
     <p class="lento">Está demorando mais que o normal. <a id="abrir-direto" href="#" target="_top">Toque aqui para abrir em outra página</a>.</p>
   </div>
+
+  <div id="aviso" role="alertdialog" aria-labelledby="aviso-titulo">
+    <div class="faixa"></div>
+    <h1 id="aviso-titulo">Para se inscrever, abra no navegador do celular</h1>
+    <p>O navegador interno do Instagram (e de outros aplicativos) costuma deixar a página de inscrição em branco.</p>
+    <div class="passos">
+      <p style="margin:0;color:#3b2a63"><strong>iPhone:</strong> toque no ícone da <strong>bússola</strong> (ou nos <strong>⋯</strong>) e escolha <strong>Abrir no Safari</strong>.</p>
+      <p style="margin:8px 0 0;color:#3b2a63"><strong>Android:</strong> toque nos <strong>três pontinhos ⋮</strong> e escolha <strong>Abrir no Chrome</strong> (ou “Abrir no navegador”).</p>
+    </div>
+    <button type="button" id="aviso-copiar" class="principal">Copiar o link da inscrição</button>
+    <p id="aviso-copiado" class="copiado">Link copiado! Cole no Safari ou no Chrome.</p>
+    <button type="button" id="aviso-tentar" class="terciario">Tentar abrir aqui mesmo</button>
+  </div>
+  <div id="ajuda"><span>A tela ficou em branco? </span><button type="button" id="ajuda-abrir">Toque aqui</button></div>
 
   <iframe id="evento-iframe" title="Bebêminhada Solidária 2026 — Inscrição" allow="clipboard-write; web-share"></iframe>
 
@@ -72,12 +106,45 @@
 
       var iframe = document.getElementById("evento-iframe");
       var espera = document.getElementById("espera");
+      var aviso = document.getElementById("aviso");
+      var ajuda = document.getElementById("ajuda");
       document.getElementById("abrir-direto").href = destino;
 
-      // Se o Apps Script travar (9 s sem carregar), a tela de espera oferece abrir direto.
-      var avisoDemora = setTimeout(function () { espera.classList.add("demora"); }, 9000);
-      iframe.addEventListener("load", function () { clearTimeout(avisoDemora); espera.classList.add("fim"); });
-      iframe.src = destino;
+      // Navegador embutido de aplicativo (Instagram, Facebook, TikTok...) ou WebView do iPhone/iPad (sem "Safari" na
+      // identificacao): o Apps Script abre e depois fica em tela branca. Nesses, nao carrega a moldura sozinho.
+      var ua = navigator.userAgent || "";
+      var embutido = /Instagram|FBAN|FBAV|FB_IAB|FBIOS|TikTok|musical_ly|Bytedance|Snapchat|MicroMessenger|Line\//i.test(ua)
+        || (/iPhone|iPad|iPod/.test(ua) && !/Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua));
+      var linkCopia = window.location.href;
+
+      function carregar() {
+        aviso.classList.remove("ativo");
+        espera.classList.remove("fim");
+        // Se o Apps Script travar (9 s sem carregar), a tela de espera oferece abrir direto.
+        var avisoDemora = setTimeout(function () { espera.classList.add("demora"); }, 9000);
+        iframe.addEventListener("load", function () { clearTimeout(avisoDemora); espera.classList.add("fim"); });
+        if (!iframe.getAttribute("src")) iframe.src = destino;
+      }
+      function mostrarAviso() {
+        espera.classList.add("fim");
+        aviso.classList.add("ativo");
+      }
+      function copiarLink() {
+        var ok = document.getElementById("aviso-copiado");
+        function pronto() { ok.style.display = "block"; }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(linkCopia).then(pronto, function () { window.prompt("Copie o link:", linkCopia); });
+        } else { window.prompt("Copie o link:", linkCopia); }
+      }
+      document.getElementById("aviso-copiar").addEventListener("click", copiarLink);
+      document.getElementById("aviso-tentar").addEventListener("click", carregar);
+      document.getElementById("ajuda-abrir").addEventListener("click", mostrarAviso);
+
+      // Celulares: faixa pequena embaixo ("A tela ficou em branco? Toque aqui") para o caso de o aviso nao ter sido detectado.
+      if (navigator.maxTouchPoints > 0 && pagina === "inscricao") { ajuda.style.display = "block"; document.body.classList.add("com-ajuda"); }
+      if (pagina === "ingresso") document.getElementById("aviso-titulo").textContent = "Para ver seu ingresso, abra no navegador do celular";
+
+      if (embutido) { mostrarAviso(); } else { carregar(); }
     })();
   </script>
 </body>
