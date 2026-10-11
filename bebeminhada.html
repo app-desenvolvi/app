@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<!-- v.2.7.0 (a definir) — Inscrição e ingresso da Bebêminhada Solidária como PÁGINA ESTÁTICA (GitHub Pages), sem moldura do Apps Script.
+     Alternativa à evento.html: funciona dentro do navegador do Instagram. Os dados vêm do Apps Script por POST (rota "api":"evento" do doPost).
+     Endereços: bebeminhada.html?tipo=kit | ?tipo=participacao | ?page=ingresso&t=TOKEN
+     Para voltar a usar a evento.html, basta trocar o link dos botões da landing. -->
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bebêminhada Solidária 2026 — Inscrição</title>
+    <meta name="description" content="Participe da Bebêminhada Solidária 2026 em benefício da Associação Guadalupe. Faça sua inscrição.">
+    <meta name="theme-color" content="#fffdf7">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+      :root { --cream:#fffdf7; --ink:#3b2a63; --body:#4a4458; --coral:#f58634; --terra:#d9611a; --sage:#7ac143; --sand:#fff3d1; --line:rgba(59,42,99,.18); }
+      * { box-sizing: border-box; }
+      body { margin:0; padding:0 16px 48px; background:var(--cream); color:var(--ink); font-family:"DM Sans","Segoe UI",sans-serif; font-size:16px; }
+      .barra { height:6px; margin:0 -16px 0; background:linear-gradient(90deg,#ffc928 0 20%,#f58634 20% 40%,#2f9bd8 40% 60%,#7ac143 60% 80%,#cc66ff 80%); }
+      .wrap { max-width:560px; margin:0 auto; }
+      .hd { text-align:center; padding:26px 0 8px; }
+      .hd img { max-width:230px; max-height:110px; object-fit:contain; margin-bottom:8px; }
+      .hd h1 { margin:0; font-size:clamp(1.6rem,6vw,2.2rem); line-height:1.1; letter-spacing:-.04em; }
+      .hd p { margin:8px 0 0; color:var(--body); line-height:1.45; }
+      h2 { font-size:13px; letter-spacing:.14rem; text-transform:uppercase; color:var(--terra); margin:30px 0 12px; }
+      .tipos { display:grid; gap:12px; }
+      .tipo { display:block; position:relative; border:2px solid var(--line); border-radius:18px; padding:16px 16px 16px 52px; background:#fff; cursor:pointer; transition:border-color .15s, box-shadow .15s; }
+      .tipo input { position:absolute; left:18px; top:20px; width:20px; height:20px; accent-color:var(--terra); }
+      .tipo b { display:block; font-size:19px; margin-top:2px; }
+      .tipo .et { display:block; font-style:normal; font-size:12px; font-weight:700; letter-spacing:.12rem; text-transform:uppercase; color:var(--terra); }
+      .tipo .et.verde { color:#4f8f1f; }
+      .tipo .txt { color:var(--body); font-size:14.5px; line-height:1.45; margin-top:5px; }
+      .tipo .txt ul { margin:6px 0; padding-left:18px; }
+      .trocar { display:inline-block; margin-top:10px; font-size:14px; font-weight:700; color:var(--terra); }
+      .intro { text-align:center; color:var(--body); line-height:1.5; margin:14px 0 0; }
+      .tipo.sel { border-color:var(--terra); box-shadow:0 8px 24px rgba(217,97,26,.14); }
+      label.rot { display:block; font-size:13.5px; font-weight:700; margin:14px 0 5px; }
+      input[type=text], input[type=email], input[type=tel], input[type=number], select {
+        width:100%; padding:13px 14px; border:1.5px solid var(--line); border-radius:12px; font:inherit; color:var(--ink); background:#fff;
+      }
+      input:focus, select:focus { outline:3px solid rgba(245,134,52,.35); border-color:var(--coral); }
+      .duas { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+      .dica { font-size:13.5px; color:var(--body); line-height:1.45; margin:4px 0 0; }
+      .linha { display:flex; gap:8px; align-items:center; margin-bottom:8px; }
+      .linha .p-idade { max-width:100px; flex:0 0 100px; }
+      .kit-n { flex:0 0 52px; font-size:13px; font-weight:700; color:var(--body); }
+      .x { flex:0 0 40px; height:40px; border:0; border-radius:50%; background:#f1ecf8; color:var(--ink); font-size:22px; line-height:1; cursor:pointer; }
+      .add { border:2px dashed var(--line); background:transparent; color:var(--ink); border-radius:12px; padding:11px 14px; font:inherit; font-weight:700; cursor:pointer; width:100%; }
+      .resumo { font-size:14px; color:var(--body); margin:8px 0 0; }
+      .caixa { background:var(--sand); border-radius:18px; padding:18px; margin-top:12px; }
+      .valor-show { font-size:36px; font-weight:700; letter-spacing:-.03em; text-align:center; }
+      input[type=range] { width:100%; margin:12px 0 6px; accent-color:var(--terra); height:32px; }
+      .valor-linha { display:flex; align-items:center; gap:10px; }
+      .valor-linha span { font-weight:700; }
+      .aceite { display:flex; gap:10px; align-items:flex-start; margin-top:24px; font-size:14px; line-height:1.45; color:var(--body); }
+      .aceite input { width:20px; height:20px; margin-top:2px; accent-color:var(--terra); flex:0 0 auto; }
+      .btn { display:block; width:100%; margin-top:20px; padding:16px; border:0; border-radius:999px; background:var(--terra); color:#fff; font:inherit; font-size:17px; font-weight:700; cursor:pointer; }
+      .btn:disabled { opacity:.6; cursor:wait; }
+      .erro { margin-top:16px; padding:14px 16px; border-radius:14px; background:#fde8e8; color:#8a1c1c; font-size:15px; line-height:1.4; }
+      .fechado { margin-top:30px; padding:24px; border-radius:20px; background:var(--sand); text-align:center; line-height:1.5; }
+      .espera { text-align:center; padding:50px 10px; color:var(--body); }
+      .oculto { display:none !important; }
+      .isca { position:absolute; left:-10000px; top:auto; width:1px; height:1px; overflow:hidden; }
+      .nota { margin-top:14px; font-size:13px; color:var(--body); line-height:1.45; }
+    
+      .ing-erro { max-width:420px; margin:40px auto; text-align:center; padding:24px; border-radius:20px; background:#fde8e8; color:#8a1c1c; line-height:1.5; }
+    </style>
+<style>
+  .tk { background:#fff; border:1px solid rgba(59,42,99,.15); border-radius:24px; box-shadow:0 16px 40px rgba(59,42,99,.10); overflow:hidden; max-width:420px; margin:0 auto; }
+  .tk-faixa { height:6px; background:linear-gradient(90deg,#ffc928 0 20%,#f58634 20% 40%,#2f9bd8 40% 60%,#7ac143 60% 80%,#cc66ff 80%); }
+  .tk-topo { padding:22px 22px 8px; text-align:center; }
+  .tk-logo { max-width:190px; max-height:90px; object-fit:contain; margin-bottom:10px; }
+  .tk-evento { font-weight:700; font-size:20px; color:#3b2a63; letter-spacing:-.02em; line-height:1.2; }
+  .tk-sub { color:#4a4458; font-size:14px; margin-top:6px; }
+  .tk-badge { display:inline-block; margin-top:12px; padding:5px 14px; border-radius:999px; font-size:12px; font-weight:700; letter-spacing:.12rem; color:#fff; }
+  .tk-badge.tk-kit { background:#d9611a; }
+  .tk-badge.tk-participacao { background:#4c9a1e; }
+  .tk-corpo { padding:10px 22px 22px; text-align:center; }
+  .tk-qr { display:inline-block; padding:12px; background:#fff; border:2px dashed rgba(59,42,99,.25); border-radius:18px; margin:10px 0 6px; }
+  .tk-qr img, .tk-qr canvas { display:block; }
+  .tk-cod { font-family:ui-monospace,Consolas,monospace; font-weight:700; font-size:17px; letter-spacing:.08rem; color:#3b2a63; }
+  .tk-dica { font-size:12.5px; color:#6b6478; margin:2px 0 14px; }
+  .tk-linha { display:flex; justify-content:space-between; gap:12px; padding:9px 0; border-top:1px solid rgba(59,42,99,.10); font-size:14.5px; text-align:left; }
+  .tk-linha span:first-child { color:#6b6478; flex:0 0 auto; }
+  .tk-linha span:last-child { color:#3b2a63; font-weight:600; text-align:right; }
+  .tk-acoes { display:flex; flex-wrap:wrap; gap:10px; margin-top:16px; }
+  .tk-btn { flex:1 1 150px; border:0; border-radius:999px; padding:13px 18px; font:inherit; font-weight:700; cursor:pointer; background:#3b2a63; color:#fff; text-decoration:none; text-align:center; }
+  .tk-btn.sec { background:#fff; color:#3b2a63; border:2px solid #3b2a63; }
+  .tk-btn.pagar { background:#f58634; font-size:17px; padding:15px 18px; }
+  .tk-btn:disabled { opacity:.6; cursor:wait; }
+  .tk-aviso { border-radius:16px; padding:16px; background:#fff3d1; color:#6b4a00; font-size:15px; line-height:1.5; text-align:left; margin:12px 0; }
+  .tk-aviso.erro { background:#fde8e8; color:#8a1c1c; }
+  .tk-valor { font-size:30px; font-weight:700; color:#3b2a63; margin:4px 0 2px; }
+  .tk-ok { color:#2f7d12; font-weight:700; font-size:14px; margin-top:4px; }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+  var evtTkEl = null, evtTkTimer = null, evtTkTentativas = 0;
+
+  function evtEsc(s) {
+    return String(s === null || s === undefined ? "" : s).replace(/[&<>"']/g, function(c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function evtMoeda(n) {
+    return Number(n || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  }
+
+  /** Desenha o ingresso (ou o painel de pagamento, ou o aviso de cancelado) dentro do elemento. */
+  function evtRenderIngresso(el, ing) {
+    evtTkEl = el;
+    if (evtTkTimer) { clearTimeout(evtTkTimer); evtTkTimer = null; }
+    var ehDoador = ing.tipo === "KIT";   // (Kit Solidário; nome interno antigo da variável)
+    var valido = ing.status === "CONFIRMADO" || ing.status === "A CONFIRMAR";
+    var aguardando = ing.status === "AGUARDANDO PAGAMENTO";
+
+    var h = '<div class="tk"><div class="tk-faixa"></div><div class="tk-topo">';
+    if (ing.eventoLogoUrl) h += '<img class="tk-logo" src="' + evtEsc(ing.eventoLogoUrl) + '" alt="">';
+    h += '<div class="tk-evento">' + evtEsc(ing.eventoNome) + '</div>';
+    if (ing.eventoDataLocal) h += '<div class="tk-sub">' + evtEsc(ing.eventoDataLocal) + '</div>';
+    h += '<span class="tk-badge ' + (ehDoador ? 'tk-kit' : 'tk-participacao') + '">' + (ehDoador ? 'KIT SOLIDÁRIO' : 'PARTICIPAÇÃO') + '</span>';
+    h += '</div><div class="tk-corpo">';
+
+    if (valido) {
+      h += '<div class="tk-qr" id="tk-qr"></div>';
+      h += '<div class="tk-cod">' + evtEsc(ing.id) + '</div>';
+      h += '<div class="tk-dica">Apresente este QR-Code na entrada. Tire um print ou guarde o link do ingresso.</div>';
+      if (ing.emailEnviado && ing.emailMascarado) h += '<div class="tk-dica" style="margin-top:-6px">Enviamos uma cópia para <b>' + evtEsc(ing.emailMascarado) + '</b>.</div>';
+      if (ing.status === "A CONFIRMAR") h += '<div class="tk-aviso">Recebemos o seu pagamento e ele está em conferência pela organização. Seu ingresso continua valendo.</div>';
+    } else if (aguardando) {
+      h += '<div class="tk-aviso"><b>Falta só o pagamento para liberar o seu ingresso.</b><br>Assim que o pagamento for confirmado, o QR-Code aparece aqui.</div>';
+      h += '<div class="tk-valor">' + evtMoeda(ing.valorTotal) + '</div>';
+      h += '<div class="tk-dica">' + ing.qtdKits + (ing.qtdKits === 1 ? ' kit' : ' kits') + (ing.eventoBeneficiaria ? ' · em benefício de ' + evtEsc(ing.eventoBeneficiaria) : '') + '</div>';
+      if (ing.linkPagamento) {
+        h += '<div class="tk-acoes"><a class="tk-btn pagar" href="' + evtEsc(ing.linkPagamento) + '" target="_blank" rel="noopener">Pagar agora</a></div>';
+      } else {
+        h += '<div class="tk-acoes"><button type="button" class="tk-btn pagar" id="tk-gerar" onclick="evtGerarLink()">Gerar link de pagamento</button></div>';
+      }
+    } else {
+      h += '<div class="tk-aviso erro"><b>Esta inscrição foi cancelada.</b><br>Em caso de dúvida, fale com a organização.</div>';
+    }
+
+    h += '<div style="margin-top:6px">';
+    h += '<div class="tk-linha"><span>Nome</span><span>' + evtEsc(ing.nome) + '</span></div>';
+    var pessoasTxt = ing.qtdPessoas + (ing.qtdPessoas === 1 ? ' pessoa' : ' pessoas');
+    if (ing.qtdCriancas > 0) pessoasTxt += ' · ' + ing.qtdCriancas + (ing.qtdCriancas === 1 ? ' criança' : ' crianças');
+    h += '<div class="tk-linha"><span>Grupo</span><span>' + pessoasTxt + '</span></div>';
+    if (ing.participantes) h += '<div class="tk-linha"><span>Com você</span><span>' + evtEsc(ing.participantes) + '</span></div>';
+    if (ehDoador && ing.qtdKits > 0) h += '<div class="tk-linha"><span>Kits</span><span>' + evtEsc(ing.kitsTexto) + '</span></div>';
+    if (ehDoador && valido) h += '<div class="tk-linha"><span>Valor</span><span>' + evtMoeda(ing.valorTotal) + '</span></div>';
+    h += '</div>';
+
+    if (valido) {
+      h += '<div class="tk-acoes">';
+      h += '<button type="button" class="tk-btn sec" onclick="evtCopiarLink()">Copiar link do ingresso</button>';
+      if (navigator.share) h += '<button type="button" class="tk-btn" onclick="evtCompartilhar()">Compartilhar</button>';
+      if (ing.emailMascarado) h += '<button type="button" class="tk-btn sec" id="tk-email" onclick="evtPedirEmail()">' + (ing.emailEnviado ? 'Reenviar para o meu e-mail' : 'Enviar para o meu e-mail') + '</button>';
+      h += '</div><div id="tk-msg" class="tk-ok"></div>';
+    } else if (aguardando) {
+      h += '<div class="tk-acoes"><button type="button" class="tk-btn sec" id="tk-atualizar" onclick="evtAtualizarIngresso()">Já paguei — atualizar</button></div>';
+      h += '<div class="tk-dica" style="margin-top:12px">Guarde este link para voltar depois: <b style="word-break:break-all">' + evtEsc(ing.urlIngresso) + '</b></div>';
+    }
+    h += '</div></div>';
+    el.innerHTML = h;
+    window.evtIngressoAtual = ing;
+
+    if (valido) {
+      var alvo = document.getElementById("tk-qr");
+      if (typeof QRCode !== "undefined") {
+        new QRCode(alvo, { text: ing.token, width: 230, height: 230, colorDark: "#3b2a63", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.M });
+      } else {
+        alvo.innerHTML = '<div class="tk-cod" style="padding:20px">' + evtEsc(ing.token) + '</div>';
+      }
+    } else if (aguardando) {
+      // Quem volta do pagamento nesta mesma aba: confere sozinho a cada 20 s por até 15 minutos.
+      evtTkTentativas = 0;
+      evtAgendarConferencia();
+    }
+  }
+
+  function evtAgendarConferencia() {
+    evtTkTimer = setTimeout(function() {
+      evtTkTentativas++;
+      if (evtTkTentativas > 45 || !window.evtIngressoAtual) return;
+      google.script.run.withSuccessHandler(function(res) {
+        if (res && !res.erro && res.ingresso) {
+          if (res.ingresso.status !== "AGUARDANDO PAGAMENTO") evtRenderIngresso(evtTkEl, res.ingresso);
+          else evtAgendarConferencia();
+        } else {
+          evtAgendarConferencia();
+        }
+      }).withFailureHandler(function() { evtAgendarConferencia(); }).evtObterIngresso(window.evtIngressoAtual.token);
+    }, 20000);
+  }
+
+  function evtAtualizarIngresso() {
+    var b = document.getElementById("tk-atualizar");
+    if (b) { b.disabled = true; b.textContent = "Conferindo..."; }
+    google.script.run.withSuccessHandler(function(res) {
+      if (res && !res.erro && res.ingresso) {
+        evtRenderIngresso(evtTkEl, res.ingresso);
+        if (res.ingresso.status === "AGUARDANDO PAGAMENTO") {
+          var b2 = document.getElementById("tk-atualizar");
+          if (b2) b2.textContent = "Ainda não confirmou — tente de novo em instantes";
+        }
+      } else {
+        if (b) { b.disabled = false; b.textContent = "Já paguei — atualizar"; }
+        alert((res && res.msg) || "Não foi possível conferir agora.");
+      }
+    }).withFailureHandler(function() {
+      if (b) { b.disabled = false; b.textContent = "Já paguei — atualizar"; }
+      alert("Erro de conexão. Tente novamente.");
+    }).evtObterIngresso(window.evtIngressoAtual.token);
+  }
+
+  function evtGerarLink() {
+    var b = document.getElementById("tk-gerar");
+    if (b) { b.disabled = true; b.textContent = "Gerando..."; }
+    google.script.run.withSuccessHandler(function(res) {
+      if (res && !res.erro && res.ingresso) {
+        evtRenderIngresso(evtTkEl, res.ingresso);
+      } else {
+        if (b) { b.disabled = false; b.textContent = "Gerar link de pagamento"; }
+        alert((res && res.msg) || "Não foi possível gerar o link agora.");
+      }
+    }).withFailureHandler(function() {
+      if (b) { b.disabled = false; b.textContent = "Gerar link de pagamento"; }
+      alert("Erro de conexão. Tente novamente.");
+    }).evtObterLinkPagamento(window.evtIngressoAtual.token);
+  }
+
+  function evtMensagem(t) {
+    var m = document.getElementById("tk-msg");
+    if (m) m.textContent = t;
+  }
+  function evtCopiarLink() {
+    var url = window.evtIngressoAtual.urlIngresso;
+    function fallback() {
+      var ta = document.createElement("textarea");
+      ta.value = url; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      var ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) {}
+      document.body.removeChild(ta);
+      evtMensagem(ok ? "Link copiado!" : "Copie o link: " + url);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(function() { evtMensagem("Link copiado!"); }, fallback);
+    } else {
+      fallback();
+    }
+  }
+  function evtPedirEmail() {
+    var b = document.getElementById("tk-email");
+    var rotulo = b ? b.textContent : "";
+    if (b) { b.disabled = true; b.textContent = "Enviando..."; }
+    google.script.run.withSuccessHandler(function(res) {
+      if (b) { b.disabled = false; b.textContent = rotulo; }
+      evtMensagem((res && res.msg) || "Não foi possível enviar agora.");
+    }).withFailureHandler(function() {
+      if (b) { b.disabled = false; b.textContent = rotulo; }
+      evtMensagem("Erro de conexão. Tente novamente.");
+    }).evtReenviarEmail(window.evtIngressoAtual.token);
+  }
+  function evtCompartilhar() {
+    var ing = window.evtIngressoAtual;
+    navigator.share({ title: "Meu ingresso - " + ing.eventoNome, url: ing.urlIngresso }).catch(function() {});
+  }
+</script>
+
+  </head>
+  <body>
+    <div id="area-inscricao" class="oculto">
+    <div class="barra"></div>
+    <div class="wrap">
+      <div class="hd" id="topo"></div>
+      <div id="carregando" class="espera">Carregando...</div>
+      <div id="fechado" class="fechado oculto"></div>
+
+      <form id="form" class="oculto" onsubmit="enviar(event)" autocomplete="on" novalidate>
+        <div class="isca" aria-hidden="true"><label>Não preencha este campo <input type="text" name="website" id="website" tabindex="-1" autocomplete="off"></label></div>
+
+        <h2 id="tit-tipo">1 · Como você quer participar?</h2>
+        <div class="tipos">
+          <label class="tipo" id="card-KIT">
+            <input type="radio" name="tipo" value="KIT" onchange="escolherTipo('KIT')">
+            <em class="et" id="et-kit"></em>
+            <b>Vista essa causa</b>
+            <div class="txt" id="txt-cartao-kit"></div>
+          </label>
+          <label class="tipo" id="card-PARTICIPACAO">
+            <input type="radio" name="tipo" value="PARTICIPACAO" onchange="escolherTipo('PARTICIPACAO')">
+            <em class="et verde">Participação gratuita</em>
+            <b>Caminhe pelo bem</b>
+            <div class="txt" id="txt-cartao-participacao"></div>
+          </label>
+        </div>
+        <a href="#" class="trocar oculto" id="trocar-tipo" onclick="event.preventDefault(); trocarTipo();">Quero escolher outro tipo de inscrição</a>
+
+        <div id="bloco" class="oculto">
+          <h2>2 · Seus dados</h2>
+          <label class="rot" for="nome">Nome completo</label>
+          <input type="text" id="nome" maxlength="100" autocomplete="name" required>
+          <div class="duas">
+            <div>
+              <label class="rot" for="celular">Celular (WhatsApp)</label>
+              <input type="tel" id="celular" maxlength="15" placeholder="(00) 00000-0000" autocomplete="tel" oninput="mascaraTelefone(this)" required>
+            </div>
+            <div>
+              <label class="rot" for="idade">Sua idade</label>
+              <input type="number" id="idade" min="0" max="110" inputmode="numeric" oninput="resumoPessoas()" required>
+            </div>
+          </div>
+          <label class="rot" for="email">E-mail</label>
+          <input type="email" id="email" maxlength="120" autocomplete="email" required>
+          <div id="box-cpf" class="oculto">
+            <label class="rot" for="cpf">CPF</label>
+            <input type="text" id="cpf" maxlength="14" placeholder="000.000.000-00" inputmode="numeric" oninput="mascaraCPF(this)">
+            <p class="dica">Necessário para gerar o pagamento da contribuição.</p>
+          </div>
+
+          <h2>3 · Quem vai com você?</h2>
+          <p class="dica" style="margin-top:0">Adicione cada pessoa que vai junto, com o primeiro nome e a idade. Se for sozinho(a), pode pular.</p>
+          <div id="pessoas" style="margin-top:12px"></div>
+          <button type="button" class="add" onclick="addPessoa()">+ Adicionar pessoa</button>
+          <p class="resumo" id="resumo-pessoas"></p>
+
+          <div id="bloco-kit" class="oculto">
+            <h2>4 · Seus kits</h2>
+            <p class="dica" style="margin-top:0" id="txt-kits">Peça quantos kits quiser e escolha o tamanho da camiseta de cada um.</p>
+            <div id="kits" style="margin-top:12px"></div>
+            <button type="button" class="add" onclick="addKit()">+ Adicionar outro kit</button>
+
+            <h2>5 · Valor</h2>
+            <div class="caixa">
+              <div class="valor-show" id="valor-show"></div>
+              <input type="range" id="slider" oninput="aoDeslizar()" aria-label="Valor da contribuição">
+              <div class="valor-linha">
+                <span>Ou digite o valor: R$</span>
+                <input type="text" id="valor-num" inputmode="decimal" oninput="aoDigitar()" onblur="aoSairValor()" style="max-width:140px">
+              </div>
+              <p class="dica" id="valor-min"></p>
+            </div>
+          </div>
+
+          <label class="aceite">
+            <input type="checkbox" id="aceite">
+            <span>Concordo com o uso dos meus dados para a organização do evento (ingresso, entrega de kits e contato sobre o evento).</span>
+          </label>
+
+          <div id="erro" class="erro oculto" role="alert"></div>
+          <button type="submit" class="btn" id="btn-enviar">Garantir meu ingresso</button>
+        </div>
+      </form>
+
+      <div id="resultado" style="margin-top:24px"></div>
+    </div>
+    </div>
+    <div id="ingresso-pagina" class="oculto" style="padding:24px 16px 40px"><div class="espera">Carregando o seu ingresso...</div></div>
+    <script>
+      // =====================================================================================================
+      // Esta página é HTML comum (GitHub Pages): NÃO usa a moldura do Apps Script, que o navegador do Instagram deixa em
+      // branco. Ela fala com o Apps Script por POST (texto simples, sem pré-voo CORS), chamando as mesmas funções públicas
+      // de sempre. O "google.script.run" abaixo imita só o que a inscrição e o ingresso usam.
+      // =====================================================================================================
+      var API_URL = "https://script.google.com/macros/s/AKfycbytQm1L6r_0wrZM1mXiTO2HFM_DAfd2tDEF6h7OVxYS0xWfUG5j0y_zGVz-zOLyT1w-/exec";
+
+      function chamarApi(fn, args, aoSucesso, aoFalhar) {
+        var ctl = (typeof AbortController !== "undefined") ? new AbortController() : null;
+        var limite = setTimeout(function() { if (ctl) ctl.abort(); }, 60000);
+        fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ api: "evento", fn: fn, args: args }),
+          signal: ctl ? ctl.signal : undefined
+        }).then(function(r) {
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          return r.json();
+        }).then(function(res) {
+          clearTimeout(limite);
+          if (aoSucesso) aoSucesso(res);
+        }).catch(function(err) {
+          clearTimeout(limite);
+          if (aoFalhar) aoFalhar(err); else console.error(err);
+        });
+      }
+      function montarRun(ok, falha) {
+        return new Proxy({}, {
+          get: function(_, nome) {
+            if (nome === "withSuccessHandler") return function(f) { return montarRun(f, falha); };
+            if (nome === "withFailureHandler") return function(f) { return montarRun(ok, f); };
+            return function() { chamarApi(String(nome), Array.prototype.slice.call(arguments), ok, falha); };
+          }
+        });
+      }
+      window.google = { script: { run: montarRun(null, null) } };
+
+      // ---------- Qual tela abrir (inscrição ou ingresso), a partir do endereço ----------
+      var PARAMS = new URLSearchParams(window.location.search);
+      function tipoDaUrl() {
+        var t = String(PARAMS.get("tipo") || "").toLowerCase();
+        var mapa = { kit: "KIT", doador: "KIT", participacao: "PARTICIPACAO", "participação": "PARTICIPACAO", apoiador: "PARTICIPACAO" };
+        return Object.prototype.hasOwnProperty.call(mapa, t) ? mapa[t] : "";
+      }
+
+      function abrirIngressoPagina(token) {
+        var el = $("ingresso-pagina");
+        if (!/^[A-Za-z0-9.\-]{1,40}$/.test(token)) {
+          el.innerHTML = '<div class="ing-erro"><b>Link do ingresso inválido.</b><br>Use o link que você recebeu ao se inscrever.</div>';
+          return;
+        }
+        google.script.run
+          .withSuccessHandler(function(res) {
+            if (res && !res.erro && res.ingresso) {
+              evtRenderIngresso(el, res.ingresso);
+            } else {
+              el.innerHTML = '<div class="ing-erro"><b>' + evtEsc((res && res.msg) || "Ingresso não encontrado.") + '</b></div>';
+            }
+          })
+          .withFailureHandler(function() {
+            el.innerHTML = '<div class="ing-erro"><b>Não foi possível carregar agora.</b><br>Recarregue a página em instantes.</div>';
+          })
+          .evtObterIngresso(token);
+      }
+
+      window.onload = function() {
+        var pagina = String(PARAMS.get("page") || "inscricao").toLowerCase();
+        if (pagina === "ingresso") {
+          $("ingresso-pagina").classList.remove("oculto");
+          var token = String(PARAMS.get("t") || "");
+          // Voltando do pagamento: a InfinitePay devolve order_nsu + transaction_nsu + slug; é o que confirma o pagamento.
+          var ordem = String(PARAMS.get("order_nsu") || "");
+          if (ordem) {
+            google.script.run
+              .withSuccessHandler(function() { abrirIngressoPagina(token); })
+              .withFailureHandler(function() { abrirIngressoPagina(token); })
+              .evtApiVerificarRetorno(ordem, String(PARAMS.get("transaction_nsu") || ""), String(PARAMS.get("slug") || PARAMS.get("invoice_slug") || ""));
+          } else {
+            abrirIngressoPagina(token);
+          }
+          return;
+        }
+        $("area-inscricao").classList.remove("oculto");
+        google.script.run
+          .withSuccessHandler(iniciar)
+          .withFailureHandler(function() {
+            $("carregando").textContent = "Houve um atraso de conexão. Recarregue a página.";
+          })
+          .evtObterConfigPublica();
+      };
+
+      var cfg = null, tipo = "", kits = [""], valor = 0, valorMexido = false, enviando = false;
+      // Vem do site (?tipo=participacao ou ?tipo=kit): "" (escolher na página), "PARTICIPACAO" ou "KIT". O servidor só deixa passar estes 3 valores.
+      var TIPO_INICIAL = tipoDaUrl();
+      var inicioPagina = Date.now();   // tempo de preenchimento (anti-robô no servidor)
+
+      function $(id) { return document.getElementById(id); }
+
+      function mascaraTelefone(input) {
+        var v = input.value.replace(/\D/g, "");
+        v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
+        v = v.replace(/(\d)(\d{4})$/, "$1-$2");
+        input.value = v;
+      }
+      function mascaraCPF(input) {
+        var v = input.value.replace(/\D/g, "");
+        v = v.replace(/(\d{3})(\d)/, "$1.$2");
+        v = v.replace(/(\d{3})(\d)/, "$1.$2");
+        v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+        input.value = v;
+      }
+
+      // (a abertura da página é decidida em window.onload, no bloco de cima)
+
+      function iniciar(c) {
+        $("carregando").classList.add("oculto");
+        if (!c || c.erro) {
+          $("fechado").classList.remove("oculto");
+          $("fechado").textContent = (c && c.msg) || "Não foi possível carregar a página agora.";
+          return;
+        }
+        cfg = c;
+        var topo = "";
+        if (c.logoUrl) topo += '<img src="' + evtEsc(c.logoUrl) + '" alt="">';
+        topo += '<h1>' + evtEsc(c.nome) + '</h1>';
+        if (c.dataLocal) topo += '<p>' + evtEsc(c.dataLocal) + '</p>';
+        if (c.beneficiaria) topo += '<p>Em benefício de <b>' + evtEsc(c.beneficiaria) + '</b></p>';
+        // Mesmo texto do site
+        topo += '<p class="intro">Faça sua inscrição, garanta o kit da Bebêminhada e transforme uma manhã de domingo em ajuda de verdade para quem mais precisa.</p>';
+        $("topo").innerHTML = topo;
+
+        if (!c.aberto) {
+          $("fechado").classList.remove("oculto");
+          $("fechado").innerHTML = '<b>' + evtEsc(c.motivoFechado || "Inscrições encerradas.") + '</b><br>Obrigado pelo carinho! Siga a gente para acompanhar as novidades.';
+          return;
+        }
+        // Cartões das duas formas de participar — mesmos textos do site
+        $("txt-cartao-participacao").innerHTML = 'A participação é gratuita, mas a inscrição é importante para que a organização do evento possa planejar tudo com muito carinho para você e toda sua família.<br><strong>Não inclui o kit.</strong>';
+        $("et-kit").textContent = (c.kitNome || 'Kit') + ' · ' + moeda(c.valorMinimoKit);
+        var itens = (c.kitItens || []).map(function(t) { return '<li>' + evtEsc(t) + '</li>'; }).join('');
+        $("txt-cartao-kit").innerHTML = 'Garanta seu kit oficial por <strong>' + moeda(c.valorMinimoKit) + '</strong>' + (itens ? ', com:<ul>' + itens + '</ul>' : '.<br>') +
+          (c.beneficiaria ? 'Adquirindo o kit você ajuda a fortalecer o trabalho da ' + evtEsc(c.beneficiaria) + ' e torna esse movimento do bem ainda maior.' : '');
+        $("txt-kits").textContent = (c.kitItens && c.kitItens.length ? 'Cada kit inclui: ' + c.kitItens.join(', ') + '. ' : '') + 'Peça quantos quiser e escolha o tamanho da camiseta de cada um.';
+        $("form").classList.remove("oculto");
+        if (TIPO_INICIAL) fixarTipo(TIPO_INICIAL);
+        if (c.prazoTexto) {
+          var aviso = document.createElement("p");
+          aviso.className = "dica";
+          aviso.style.textAlign = "center";
+          aviso.textContent = "Inscrições até " + c.prazoTexto;
+          $("topo").appendChild(aviso);
+        }
+      }
+
+      function moeda(n) { return evtMoeda(n); }
+
+      /** Veio do site com o tipo já escolhido: marca, mostra só o cartão escolhido e vai direto ao formulário desse tipo. */
+      function fixarTipo(t) {
+        var radio = document.querySelector('input[name=tipo][value=' + t + ']');
+        if (radio) radio.checked = true;
+        escolherTipo(t);
+        var outro = t === "KIT" ? "PARTICIPACAO" : "KIT";
+        $("card-" + outro).classList.add("oculto");
+        $("trocar-tipo").classList.remove("oculto");
+        $("tit-tipo").textContent = "1 · Sua escolha";
+        setTimeout(function() { $("tit-tipo").scrollIntoView({ behavior: "smooth", block: "start" }); }, 200);
+      }
+      function trocarTipo() {
+        $("card-PARTICIPACAO").classList.remove("oculto");
+        $("card-KIT").classList.remove("oculto");
+        $("trocar-tipo").classList.add("oculto");
+        $("tit-tipo").textContent = "1 · Como você quer participar?";
+      }
+
+      function escolherTipo(t) {
+        tipo = t;
+        $("card-PARTICIPACAO").classList.toggle("sel", t === "PARTICIPACAO");
+        $("card-KIT").classList.toggle("sel", t === "KIT");
+        var comKit = t === "KIT";
+        $("bloco").classList.remove("oculto");
+        $("box-cpf").classList.toggle("oculto", !comKit);
+        $("bloco-kit").classList.toggle("oculto", !comKit);
+        $("btn-enviar").textContent = comKit ? "Garantir meu kit e ir para o pagamento" : "Garantir meu ingresso";
+        if (comKit) { if (!kits.length) kits = [""]; renderKits(); }
+        resumoPessoas();
+      }
+
+      // ---------- Demais participantes ----------
+      function addPessoa() {
+        var d = document.createElement("div");
+        d.className = "linha";
+        d.innerHTML = '<input type="text" class="p-nome" placeholder="Primeiro nome" maxlength="30" autocomplete="off" oninput="resumoPessoas()">' +
+          '<input type="number" class="p-idade" placeholder="Idade" min="0" max="110" inputmode="numeric" oninput="resumoPessoas()">' +
+          '<button type="button" class="x" aria-label="Remover pessoa" onclick="this.parentNode.parentNode.removeChild(this.parentNode); resumoPessoas();">&times;</button>';
+        $("pessoas").appendChild(d);
+        d.querySelector(".p-nome").focus();
+        resumoPessoas();
+      }
+
+      function lerPessoas() {
+        var lista = [];
+        var linhas = document.querySelectorAll("#pessoas .linha");
+        for (var i = 0; i < linhas.length; i++) {
+          lista.push({ nome: linhas[i].querySelector(".p-nome").value, idade: linhas[i].querySelector(".p-idade").value });
+        }
+        return lista;
+      }
+
+      function resumoPessoas() {
+        if (!cfg) return;
+        var total = 1, criancas = 0;
+        var idadeTitular = parseInt($("idade").value, 10);
+        if (isFinite(idadeTitular) && idadeTitular <= cfg.criancaAte) criancas++;
+        lerPessoas().forEach(function(p) {
+          if (String(p.nome).trim() === "" && String(p.idade).trim() === "") return;
+          total++;
+          var n = parseInt(p.idade, 10);
+          if (isFinite(n) && n <= cfg.criancaAte) criancas++;
+        });
+        $("resumo-pessoas").textContent = total + (total === 1 ? " pessoa" : " pessoas") + " no total" + (criancas ? " (" + criancas + (criancas === 1 ? " criança" : " crianças") + ")" : "") + ".";
+      }
+
+      // ---------- Kits ----------
+      function contarOutros(nome, i) {
+        var n = 0;
+        for (var j = 0; j < kits.length; j++) if (j !== i && kits[j] === nome) n++;
+        return n;
+      }
+
+      function renderKits() {
+        var h = "";
+        kits.forEach(function(sel, i) {
+          h += '<div class="linha"><span class="kit-n">Kit ' + (i + 1) + '</span><select onchange="trocarTamanho(' + i + ', this.value)" aria-label="Tamanho da camiseta do kit ' + (i + 1) + '">';
+          h += '<option value="">Tamanho da camiseta...</option>';
+          cfg.tamanhos.forEach(function(t) {
+            var esgotado = t.disponivel !== null && (t.disponivel - contarOutros(t.nome, i)) <= 0 && sel !== t.nome;
+            h += '<option value="' + evtEsc(t.nome) + '"' + (sel === t.nome ? ' selected' : '') + (esgotado ? ' disabled' : '') + '>' + evtEsc(t.nome) + (esgotado ? ' (esgotado)' : '') + '</option>';
+          });
+          h += '</select>';
+          if (kits.length > 1) h += '<button type="button" class="x" aria-label="Remover kit ' + (i + 1) + '" onclick="removerKit(' + i + ')">&times;</button>';
+          h += '</div>';
+        });
+        $("kits").innerHTML = h;
+        atualizarValor();
+      }
+      function trocarTamanho(i, v) { kits[i] = v; renderKits(); }
+      function addKit() { if (kits.length >= 30) return; kits.push(""); renderKits(); }
+      function removerKit(i) { kits.splice(i, 1); renderKits(); }
+
+      // ---------- Valor da contribuição (mínimo por kit; pode subir pelo controle ou digitando) ----------
+      function minimoAtual() { return Math.round(cfg.valorMinimoKit * kits.length * 100) / 100; }
+
+      function atualizarValor() {
+        var min = minimoAtual();
+        if (!valorMexido || valor < min) valor = min;
+        var sl = $("slider");
+        sl.min = min;
+        sl.max = Math.max(cfg.sliderMax, min * 3);
+        sl.step = cfg.valorMinimoKit >= 10 ? 5 : 1;
+        sl.value = Math.min(valor, Number(sl.max));
+        $("valor-num").value = formatarNumero(valor);
+        $("valor-show").textContent = moeda(valor);
+        $("valor-min").textContent = kits.length + (kits.length === 1 ? " kit" : " kits") + " × " + moeda(cfg.valorMinimoKit) + " = " + moeda(min) + ". Quer contribuir com mais? É só ajustar o valor.";
+      }
+      function formatarNumero(n) { return String(Math.round(n * 100) / 100).replace(".", ","); }
+      function aoDeslizar() {
+        valor = Number($("slider").value);
+        valorMexido = true;
+        $("valor-num").value = formatarNumero(valor);
+        $("valor-show").textContent = moeda(valor);
+      }
+      function aoDigitar() {
+        var n = parseFloat(String($("valor-num").value).replace(/\./g, "").replace(",", "."));
+        if (!isFinite(n)) return;
+        valor = n;
+        valorMexido = true;
+        $("valor-show").textContent = moeda(valor);
+        var sl = $("slider");
+        sl.value = Math.min(Math.max(valor, Number(sl.min)), Number(sl.max));
+      }
+      function aoSairValor() {
+        var min = minimoAtual();
+        if (!isFinite(valor) || valor < min) valor = min;
+        atualizarValor();
+      }
+
+      // ---------- Envio ----------
+      function mostrarErro(msg) {
+        var e = $("erro");
+        e.textContent = msg;
+        e.classList.remove("oculto");
+        e.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+
+      function enviar(ev) {
+        ev.preventDefault();
+        if (enviando || !cfg) return;
+        $("erro").classList.add("oculto");
+        if (!tipo) return mostrarErro("Escolha como deseja participar: gratuito (sem kit) ou com o kit solidário.");
+
+        var comKit = tipo === "KIT";
+        if ($("nome").value.trim().length < 5 || $("nome").value.trim().indexOf(" ") === -1) return mostrarErro("Informe seu nome completo.");
+        if ($("celular").value.replace(/\D/g, "").length < 10) return mostrarErro("Informe um celular válido, com DDD.");
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test($("email").value.trim())) return mostrarErro("Informe um e-mail válido.");
+        if ($("idade").value === "") return mostrarErro("Informe a sua idade.");
+        if (comKit && $("cpf").value.replace(/\D/g, "").length !== 11) return mostrarErro("Informe seu CPF completo.");
+
+        var pessoas = lerPessoas();
+        for (var i = 0; i < pessoas.length; i++) {
+          var tn = String(pessoas[i].nome).trim() !== "", ti = String(pessoas[i].idade).trim() !== "";
+          if (tn !== ti) return mostrarErro("Preencha o primeiro nome e a idade de cada pessoa que vai com você (ou remova a linha em branco).");
+        }
+        if (comKit) {
+          for (var k = 0; k < kits.length; k++) if (!kits[k]) return mostrarErro("Escolha o tamanho da camiseta do kit " + (k + 1) + ".");
+          if (valor < minimoAtual() - 0.001) return mostrarErro("O valor mínimo é " + moeda(minimoAtual()) + ".");
+        }
+        if (!$("aceite").checked) return mostrarErro("É preciso aceitar o uso dos dados para concluir a inscrição.");
+
+        var dados = {
+          tipo: tipo,
+          nome: $("nome").value,
+          celular: $("celular").value,
+          email: $("email").value,
+          cpf: comKit ? $("cpf").value : "",
+          idade: $("idade").value,
+          participantes: pessoas,
+          kits: comKit ? kits : [],
+          valor: comKit ? valor : 0,
+          aceite: true,
+          website: $("website").value,
+          tempoPreenchimentoMs: Date.now() - inicioPagina
+        };
+
+        enviando = true;
+        var btn = $("btn-enviar");
+        var textoBtn = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = comKit ? "Gerando seu pagamento..." : "Gerando seu ingresso...";
+
+        google.script.run
+          .withSuccessHandler(function(res) {
+            enviando = false;
+            if (res && !res.erro && res.ingresso) {
+              $("form").classList.add("oculto");
+              evtRenderIngresso($("resultado"), res.ingresso);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            } else {
+              btn.disabled = false;
+              btn.textContent = textoBtn;
+              mostrarErro((res && res.msg) || "Não foi possível concluir a inscrição.");
+            }
+          })
+          .withFailureHandler(function() {
+            enviando = false;
+            btn.disabled = false;
+            btn.textContent = textoBtn;
+            mostrarErro("Erro de conexão. Confira sua internet e tente novamente.");
+          })
+          .evtSalvarInscricao(dados);
+      }
+    
+    </script>
+  </body>
+</html>
