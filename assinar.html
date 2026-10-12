@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<!-- v.2.7.2 — Página pública de ASSINATURA ELETRÔNICA (MEL-0010, Fase 1). HTML comum (GitHub Pages), sem moldura do Apps Script:
+     funciona dentro do WhatsApp/Instagram. Fala com o Apps Script por POST ({"api":"assinatura",...}; ver _Assinaturas.gs).
+     Endereço: assinar.html?t=TOKEN  (um link para CADA signatário, criado na tela "Assinaturas" do app e enviado pelo WhatsApp). -->
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Assinatura de documento</title>
+  <meta name="theme-color" content="#fffdf7">
+  <style>
+    :root { --cream:#fffdf7; --ink:#3b2a63; --body:#4a4458; --coral:#f58634; --terra:#d9611a; --sand:#fff3d1; --line:rgba(59,42,99,.18); }
+    * { box-sizing:border-box; }
+    body { margin:0; padding:0 16px 56px; background:var(--cream); color:var(--ink); font-family:"DM Sans","Segoe UI",system-ui,sans-serif; font-size:16px; }
+    .barra { height:6px; margin:0 -16px; background:linear-gradient(90deg,#ffc928 0 20%,#f58634 20% 40%,#2f9bd8 40% 60%,#7ac143 60% 80%,#cc66ff 80%); }
+    .wrap { max-width:640px; margin:0 auto; }
+    h1 { font-size:clamp(1.35rem,5vw,1.8rem); line-height:1.2; margin:24px 0 4px; letter-spacing:-.02em; }
+    h2 { font-size:13px; letter-spacing:.14rem; text-transform:uppercase; color:var(--terra); margin:28px 0 10px; }
+    .sub { color:var(--body); margin:0; line-height:1.45; }
+    .oculto { display:none !important; }
+    .espera { text-align:center; padding:60px 10px; color:var(--body); }
+    .aviso { margin-top:20px; padding:16px; border-radius:16px; background:var(--sand); line-height:1.5; }
+    .erro { margin-top:16px; padding:14px 16px; border-radius:14px; background:#fde8e8; color:#8a1c1c; font-size:15px; line-height:1.4; }
+    .ok { margin-top:20px; padding:20px; border-radius:18px; background:#e9f7de; color:#255c0e; line-height:1.5; text-align:center; }
+    label.rot { display:block; font-size:13.5px; font-weight:700; margin:14px 0 5px; }
+    input[type=text], input[type=email], input[type=tel], input[type=number] {
+      width:100%; padding:13px 14px; border:1.5px solid var(--line); border-radius:12px; font:inherit; color:var(--ink); background:#fff;
+    }
+    input.invalido { border-color:#c0392b; background:#fff6f6; }
+    input:focus { outline:3px solid rgba(245,134,52,.35); border-color:var(--coral); }
+    .msg-campo { color:#c0392b; font-size:13px; margin-top:4px; }
+    .doc { background:#fff; border:1px solid var(--line); border-radius:16px; padding:18px; max-height:420px; overflow:auto; font-size:14.5px; line-height:1.55; color:#222; }
+    .doc p { margin:0 0 10px; white-space:pre-wrap; word-break:break-word; }
+    .doc mark { background:#ffe9a8; color:#3b2a63; padding:0 3px; border-radius:4px; }
+    .doc mark.cheio { background:#dff3d0; }
+    .doc mark.eu { background:#ffd9b8; font-weight:700; }
+    .pad { border:2px dashed rgba(59,42,99,.35); border-radius:16px; background:#fff; touch-action:none; position:relative; }
+    .pad canvas { display:block; width:100%; height:180px; border-radius:14px; touch-action:none; }
+    .pad .dica { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#9a93a8; pointer-events:none; font-size:15px; }
+    .linha { display:flex; gap:10px; align-items:center; justify-content:space-between; margin-top:8px; }
+    .link { background:none; border:0; color:var(--terra); font:inherit; font-weight:700; text-decoration:underline; cursor:pointer; padding:6px 0; }
+    .aceite { display:flex; gap:10px; align-items:flex-start; margin-top:20px; font-size:14px; line-height:1.45; color:var(--body); }
+    .aceite input { width:20px; height:20px; margin-top:2px; accent-color:var(--terra); flex:0 0 auto; }
+    .btn { display:block; width:100%; margin-top:20px; padding:16px; border:0; border-radius:999px; background:var(--terra); color:#fff; font:inherit; font-size:17px; font-weight:700; cursor:pointer; }
+    .btn:disabled { opacity:.6; cursor:wait; }
+    .btn.sec { background:#fff; color:var(--ink); border:2px solid var(--ink); }
+    .nota { margin-top:14px; font-size:13px; color:var(--body); line-height:1.45; }
+  </style>
+</head>
+<body>
+  <div class="barra"></div>
+  <div class="wrap">
+    <div id="carregando" class="espera">Carregando o documento...</div>
+    <div id="falha" class="aviso oculto"></div>
+
+    <!-- espera: o texto do documento ainda está sendo preenchido por outra pessoa -->
+    <div id="tela-aguardar" class="oculto">
+      <h1 id="aguardar-titulo"></h1>
+      <div class="aviso" id="aguardar-txt"></div>
+      <button type="button" class="btn sec" id="btn-reverificar">Verificar de novo</button>
+    </div>
+
+    <!-- assinar -->
+    <div id="tela-assinar" class="oculto">
+      <p class="sub" id="ola"></p>
+      <h1 id="titulo"></h1>
+      <p class="sub" id="validade"></p>
+
+      <div id="bloco-campos">
+        <h2>1 · Seus dados</h2>
+        <p class="sub" style="margin-bottom:4px">Preencha os dados abaixo. Eles vão aparecer no documento.</p>
+        <div id="campos"></div>
+      </div>
+
+      <h2 id="tit-doc">2 · Leia o documento</h2>
+      <div class="doc" id="doc" tabindex="0"></div>
+
+      <h2 id="tit-ass">3 · Assine</h2>
+      <p class="sub">Desenhe a sua assinatura no quadro com o dedo (ou o mouse).</p>
+      <div class="pad" id="pad" style="margin-top:10px">
+        <canvas id="canvas"></canvas>
+        <div class="dica" id="pad-dica">Assine aqui</div>
+      </div>
+      <div class="linha"><span class="nota" style="margin:0">A assinatura é a sua, feita agora, neste aparelho.</span><button type="button" class="link" id="limpar">Limpar</button></div>
+
+      <label class="aceite">
+        <input type="checkbox" id="aceite">
+        <span>Li o documento e concordo com o seu conteúdo. Declaro que os dados informados são verdadeiros e autorizo o uso deles para este documento (LGPD).</span>
+      </label>
+
+      <div class="erro oculto" id="erro" role="alert"></div>
+      <button type="button" class="btn" id="btn-assinar">Assinar documento</button>
+      <p class="nota">Ao assinar, o sistema registra a data e a hora, os seus dados e a identificação do aparelho. O PDF final é gerado quando todas as pessoas assinarem.</p>
+    </div>
+
+    <!-- resultado -->
+    <div id="tela-pronto" class="oculto">
+      <div class="ok">
+        <div style="font-size:42px" id="pronto-icone">✅</div>
+        <b style="font-size:20px" id="pronto-titulo"></b>
+        <p style="margin:8px 0 0" id="pronto-txt"></p>
+        <p style="margin:6px 0 0;font-family:ui-monospace,Consolas,monospace;font-weight:700" id="pronto-codigo"></p>
+      </div>
+      <button type="button" class="btn oculto" id="btn-baixar">Baixar o PDF assinado</button>
+      <button type="button" class="btn sec oculto" id="btn-reverificar2">Verificar se todos já assinaram</button>
+      <p class="nota" id="pronto-aviso"></p>
+    </div>
+  </div>
+
+  <script>
+    // Endereço publicado do Apps Script (o mesmo do bebeminhada.html / evento.html).
+    var API_URL = "https://script.google.com/macros/s/AKfycbytQm1L6r_0wrZM1mXiTO2HFM_DAfd2tDEF6h7OVxYS0xWfUG5j0y_zGVz-zOLyT1w-/exec";
+    var TOKEN = new URLSearchParams(window.location.search).get("t") || "";
+    var doc = null, pdfBase64 = "", pdfNome = "documento-assinado.pdf";
+
+    function $(id) { return document.getElementById(id); }
+
+    function chamar(fn, args, ok, falha) {
+      var ctl = (typeof AbortController !== "undefined") ? new AbortController() : null;
+      var limite = setTimeout(function() { if (ctl) ctl.abort(); }, 120000);
+      fetch(API_URL, {
+        method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ api: "assinatura", fn: fn, args: args }), signal: ctl ? ctl.signal : undefined
+      }).then(function(r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+        .then(function(res) { clearTimeout(limite); ok(res); })
+        .catch(function(err) { clearTimeout(limite); falha(err); });
+    }
+
+    function esconderTudo() {
+      ["carregando", "falha", "tela-aguardar", "tela-assinar", "tela-pronto"].forEach(function(id) { $(id).classList.add("oculto"); });
+    }
+    function mostrarFalha(msg) {
+      esconderTudo();
+      var f = $("falha"); f.textContent = msg; f.classList.remove("oculto");
+    }
+    function listaNomes(nomes) {
+      if (!nomes || !nomes.length) return "";
+      if (nomes.length === 1) return nomes[0];
+      return nomes.slice(0, -1).join(", ") + " e " + nomes[nomes.length - 1];
+    }
+
+    // ---------- Carregar ----------
+    function carregar() {
+      esconderTudo(); $("carregando").classList.remove("oculto");
+      if (!TOKEN) { mostrarFalha("Link inválido. Use o link que você recebeu pelo WhatsApp."); return; }
+      chamar("asnPublicoObter", [TOKEN], function(res) {
+        if (!res || res.erro) { mostrarFalha((res && res.msg) || "Não foi possível abrir o documento."); return; }
+        esconderTudo();
+        if (res.estado === "CONCLUIDO") return telaConcluido(res);
+        if (res.estado === "ASSINOU") return telaAssinou(res);
+        if (res.estado === "AGUARDAR") return telaAguardar(res);
+        doc = res;
+        montar();
+      }, function() { mostrarFalha("Houve um atraso de conexão. Recarregue a página."); });
+    }
+    window.onload = carregar;
+
+    function telaAguardar(res) {
+      $("tela-aguardar").classList.remove("oculto");
+      $("aguardar-titulo").textContent = res.titulo;
+      $("aguardar-txt").textContent = "Olá" + (res.nome ? ", " + res.nome.split(" ")[0] : "") + "! O documento ainda está sendo preenchido por " +
+        (listaNomes(res.aguardandoDados) || "outra pessoa") + ". Assim que essa pessoa assinar, você poderá ler o documento completo e assinar. " +
+        "Volte a este mesmo link mais tarde.";
+    }
+    $("btn-reverificar").addEventListener("click", carregar);
+    $("btn-reverificar2").addEventListener("click", carregar);
+
+    function telaAssinou(res) {
+      $("tela-pronto").classList.remove("oculto");
+      $("pronto-icone").textContent = "✅";
+      $("pronto-titulo").textContent = "Você já assinou";
+      $("pronto-txt").textContent = "Falta" + (res.pendentes.length === 1 ? "" : "m") + " assinar: " + (listaNomes(res.pendentes) || "—") + ". Quando todos assinarem, o PDF fica disponível neste mesmo link.";
+      $("pronto-codigo").textContent = res.codigo || "";
+      pdfBase64 = "";
+      var bp = $("btn-baixar");
+      if (res.temParcial) { bp.classList.remove("oculto"); bp.textContent = "Baixar o PDF parcial"; bp.onclick = function() { baixarDoServidor(bp); }; }
+      else bp.classList.add("oculto");
+      $("btn-reverificar2").classList.remove("oculto");
+    }
+
+    // Busca no servidor (PDF parcial ou final) e baixa.
+    function baixarDoServidor(b) {
+      b.disabled = true;
+      chamar("asnPublicoBaixar", [TOKEN], function(r) {
+        b.disabled = false;
+        if (!r || r.erro) { $("pronto-aviso").textContent = (r && r.msg) || "Não foi possível abrir agora."; return; }
+        baixar(r.pdfBase64, r.nomeArquivo || pdfNome);
+      }, function() { b.disabled = false; $("pronto-aviso").textContent = "Erro de conexão. Tente novamente."; });
+    }
+
+    function telaConcluido(res) {
+      $("tela-pronto").classList.remove("oculto");
+      $("pronto-icone").textContent = "✅";
+      $("pronto-titulo").textContent = "Documento concluído";
+      $("pronto-txt").textContent = "Todas as assinaturas de “" + res.titulo + "” foram feitas.";
+      $("pronto-codigo").textContent = res.codigo || "";
+      $("btn-reverificar2").classList.add("oculto");
+      var b = $("btn-baixar"); b.classList.remove("oculto"); b.textContent = "Baixar o PDF assinado";
+      b.onclick = function() {
+        if (pdfBase64) return baixar(pdfBase64, pdfNome);
+        b.disabled = true;
+        chamar("asnPublicoBaixar", [TOKEN], function(r) {
+          b.disabled = false;
+          if (!r || r.erro) { $("pronto-aviso").textContent = (r && r.msg) || "Não foi possível abrir agora."; return; }
+          pdfBase64 = r.pdfBase64; pdfNome = r.nomeArquivo || pdfNome;
+          baixar(pdfBase64, pdfNome);
+        }, function() { b.disabled = false; $("pronto-aviso").textContent = "Erro de conexão. Tente novamente."; });
+      };
+    }
+
+    // ---------- Montagem da tela de assinatura ----------
+    var MASCARAS = {
+      CPF: function(v) { v = v.replace(/\D/g, "").substring(0, 11); v = v.replace(/(\d{3})(\d)/, "$1.$2"); v = v.replace(/(\d{3})(\d)/, "$1.$2"); return v.replace(/(\d{3})(\d{1,2})$/, "$1-$2"); },
+      CNPJ: function(v) { v = v.replace(/\D/g, "").substring(0, 14); v = v.replace(/^(\d{2})(\d)/, "$1.$2"); v = v.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3"); v = v.replace(/\.(\d{3})(\d)/, ".$1/$2"); return v.replace(/(\d{4})(\d)/, "$1-$2"); },
+      CPF_CNPJ: function(v) { var d = v.replace(/\D/g, ""); return d.length <= 11 ? MASCARAS.CPF(v) : MASCARAS.CNPJ(v); },
+      CELULAR: function(v) { v = v.replace(/\D/g, "").substring(0, 11); v = v.replace(/^(\d{2})(\d)/, "($1) $2"); return v.replace(/(\d)(\d{4})$/, "$1-$2"); },
+      CEP: function(v) { v = v.replace(/\D/g, "").substring(0, 8); return v.replace(/^(\d{5})(\d)/, "$1-$2"); },
+      DATA_NASCIMENTO: function(v) { v = v.replace(/\D/g, "").substring(0, 8); v = v.replace(/^(\d{2})(\d)/, "$1/$2"); return v.replace(/^(\d{2})\/(\d{2})(\d)/, "$1/$2/$3"); },
+      UF: function(v) { return v.replace(/[^A-Za-z]/g, "").substring(0, 2).toUpperCase(); }
+    };
+    function baseMarcador(m) { return m.replace(/_(PARCEIRO|PARCEIRA|ASSINANTE|CLIENTE|CONTRATANTE|CONTRATADO|SIGNATARIO|RESPONSAVEL)$/, ""); }
+    var INPUTMODE = { CPF: "numeric", CNPJ: "numeric", CPF_CNPJ: "numeric", CEP: "numeric", CELULAR: "tel", DATA_NASCIMENTO: "numeric", EMAIL: "email" };
+    var AUTOCOMPLETE = { NOME: "name", EMAIL: "email", CELULAR: "tel", ENDERECO: "street-address", CEP: "postal-code", CIDADE: "address-level2", UF: "address-level1", DATA_NASCIMENTO: "bday" };
+
+    function montar() {
+      $("tela-assinar").classList.remove("oculto");
+      $("titulo").textContent = doc.titulo;
+      $("ola").textContent = "Olá" + (doc.nome ? ", " + doc.nome.split(" ")[0] : "") + "! Você foi convidado(a) a assinar:";
+      $("validade").textContent = doc.prazoTexto ? "Link válido até " + doc.prazoTexto + "." : "";
+
+      var cont = $("campos");
+      cont.innerHTML = "";
+      if (!doc.campos.length) {
+        $("bloco-campos").classList.add("oculto");
+        $("tit-doc").textContent = "1 · Leia o documento";
+        $("tit-ass").textContent = "2 · Assine";
+      }
+      doc.campos.forEach(function(c) {
+        var base = baseMarcador(c.marcador);
+        var lab = document.createElement("label"); lab.className = "rot"; lab.setAttribute("for", "c-" + c.marcador); lab.textContent = c.rotulo;
+        var inp = document.createElement("input");
+        inp.type = base === "EMAIL" ? "email" : "text";
+        inp.id = "c-" + c.marcador; inp.maxLength = 200; inp.autocomplete = AUTOCOMPLETE[base] || "off";
+        if (INPUTMODE[base]) inp.setAttribute("inputmode", INPUTMODE[base]);
+        if (base === "DATA_NASCIMENTO") inp.placeholder = "dd/mm/aaaa";
+        inp.addEventListener("input", function() {
+          if (MASCARAS[base]) inp.value = MASCARAS[base](inp.value);
+          inp.classList.remove("invalido");
+          var m = $("m-" + c.marcador); if (m) m.textContent = "";
+          renderDoc();
+        });
+        var msg = document.createElement("div"); msg.className = "msg-campo"; msg.id = "m-" + c.marcador;
+        cont.appendChild(lab); cont.appendChild(inp); cont.appendChild(msg);
+      });
+      renderDoc();
+      iniciarPad();
+    }
+
+    // Prévia do documento: marcadores trocados pelo que já foi informado (por mim e pelos outros signatários).
+    function renderDoc() {
+      var valores = {}, meusMarcadores = {}, rotulos = {};
+      Object.keys(doc.valores || {}).forEach(function(k) { valores[k] = doc.valores[k]; });
+      doc.campos.forEach(function(c) {
+        meusMarcadores[c.marcador] = true; rotulos[c.marcador] = c.rotulo;
+        var el = $("c-" + c.marcador); valores[c.marcador] = el ? el.value.trim() : "";
+      });
+      var hoje = new Date().toLocaleDateString("pt-BR");
+      var sistema = {
+        DATA_ENVIO: doc.dataEnvio || hoje, DATA_ENVIO_EXTENSO: doc.dataEnvioExtenso || hoje,
+        DATA_ASSINATURA: "(data da conclusão)", HORA_ASSINATURA: "(hora da conclusão)", CODIGO: doc.codigo,
+        HASH: "(gerado ao concluir)", TITULO: doc.titulo, LOGO: ""
+      };
+      var alvo = $("doc"); alvo.innerHTML = "";
+      doc.paragrafos.forEach(function(p) {
+        var el = document.createElement("p");
+        if (p === "") { el.innerHTML = "&nbsp;"; alvo.appendChild(el); return; }
+        var partes = p.split(/(\{[A-Z0-9_]{2,40}\})/);
+        partes.forEach(function(parte) {
+          var m = /^\{([A-Z0-9_]{2,40})\}$/.exec(parte);
+          if (!m) { el.appendChild(document.createTextNode(parte)); return; }
+          var chave = m[1];
+          if (/^ASSINATURA/.test(chave)) {
+            var mk = document.createElement("mark");
+            var minha = chave === doc.marcadorAssinante;
+            mk.className = minha ? "eu" : "";
+            mk.textContent = minha ? "[sua assinatura]" : "[assinatura]";
+            el.appendChild(mk); return;
+          }
+          if (Object.prototype.hasOwnProperty.call(sistema, chave)) { el.appendChild(document.createTextNode(sistema[chave])); return; }
+          var campo = document.createElement("mark");
+          var v = valores[chave];
+          campo.className = v ? "cheio" : "";
+          campo.textContent = v || ("[" + (rotulos[chave] || chave.toLowerCase().replace(/_/g, " ")) + "]");
+          el.appendChild(campo);
+        });
+        alvo.appendChild(el);
+      });
+    }
+
+    // ---------- Quadro de assinatura ----------
+    var pad = { canvas: null, ctx: null, desenhando: false, tracos: 0, ultimo: null, pronto: false };
+
+    function iniciarPad() {
+      var c = $("canvas"); pad.canvas = c; pad.ctx = c.getContext("2d");
+      function ajustar() {
+        var r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+        var larg = r.width || c.parentNode.clientWidth || 300, alt = r.height || 180;   // sem layout (aba oculta): usa um tamanho seguro
+        c.width = Math.round(larg * dpr); c.height = Math.round(alt * dpr);
+        pad.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        pad.ctx.lineWidth = 2.6; pad.ctx.lineCap = "round"; pad.ctx.lineJoin = "round"; pad.ctx.strokeStyle = "#1c1233";
+        pad.tracos = 0; $("pad-dica").classList.remove("oculto");
+      }
+      ajustar();
+      if (pad.pronto) return;
+      pad.pronto = true;
+      window.addEventListener("resize", function() { if (pad.tracos === 0) ajustar(); });
+
+      function pos(ev) { var r = c.getBoundingClientRect(); return { x: ev.clientX - r.left, y: ev.clientY - r.top }; }
+      c.addEventListener("pointerdown", function(ev) {
+        ev.preventDefault(); try { c.setPointerCapture(ev.pointerId); } catch (e) {}
+        pad.desenhando = true; pad.ultimo = pos(ev);
+        pad.ctx.beginPath(); pad.ctx.arc(pad.ultimo.x, pad.ultimo.y, 1.2, 0, 6.3); pad.ctx.fill();
+        pad.tracos++; $("pad-dica").classList.add("oculto");
+      });
+      c.addEventListener("pointermove", function(ev) {
+        if (!pad.desenhando) return; ev.preventDefault();
+        var p = pos(ev);
+        pad.ctx.beginPath(); pad.ctx.moveTo(pad.ultimo.x, pad.ultimo.y); pad.ctx.lineTo(p.x, p.y); pad.ctx.stroke();
+        pad.ultimo = p;
+      });
+      function fim() { pad.desenhando = false; }
+      c.addEventListener("pointerup", fim); c.addEventListener("pointercancel", fim); c.addEventListener("pointerleave", fim);
+      $("limpar").addEventListener("click", function() {
+        pad.ctx.clearRect(0, 0, c.width, c.height); pad.tracos = 0; $("pad-dica").classList.remove("oculto");
+      });
+    }
+
+    // Recorta o desenho (fundo transparente) para a assinatura não ficar com bordas enormes no PDF.
+    function assinaturaPng() {
+      var c = pad.canvas, w = c.width, h = c.height;
+      var dados = pad.ctx.getImageData(0, 0, w, h).data;
+      var x0 = w, y0 = h, x1 = 0, y1 = 0, pixels = 0;
+      for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
+        if (dados[(y * w + x) * 4 + 3] > 20) { pixels++; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+      }
+      if (pixels < 40) return "";
+      var m = 8; x0 = Math.max(0, x0 - m); y0 = Math.max(0, y0 - m); x1 = Math.min(w - 1, x1 + m); y1 = Math.min(h - 1, y1 + m);
+      var rec = document.createElement("canvas"); rec.width = x1 - x0 + 1; rec.height = y1 - y0 + 1;
+      rec.getContext("2d").drawImage(c, x0, y0, rec.width, rec.height, 0, 0, rec.width, rec.height);
+      return rec.toDataURL("image/png");
+    }
+
+    // ---------- Envio ----------
+    function erro(msg) { var e = $("erro"); e.textContent = msg; e.classList.remove("oculto"); e.scrollIntoView({ behavior: "smooth", block: "center" }); }
+
+    $("btn-assinar").addEventListener("click", function() {
+      $("erro").classList.add("oculto");
+      var dados = {}, vazio = null;
+      doc.campos.forEach(function(c) {
+        var v = $("c-" + c.marcador).value.trim(); dados[c.marcador] = v;
+        if (!v && !vazio) vazio = c;
+      });
+      if (vazio) { $("c-" + vazio.marcador).focus(); return erro("Preencha o campo “" + vazio.rotulo + "”."); }
+      var png = assinaturaPng();
+      if (!png) return erro("Desenhe a sua assinatura no quadro.");
+      if (!$("aceite").checked) return erro("Marque que leu o documento e concorda para assinar.");
+
+      var btn = $("btn-assinar"); btn.disabled = true; btn.textContent = "Registrando a assinatura...";
+      var meta = { ua: navigator.userAgent || "", tz: (Intl.DateTimeFormat().resolvedOptions().timeZone || ""),
+                   tela: screen.width + "x" + screen.height, idioma: navigator.language || "" };
+      chamar("asnPublicoAssinar", [TOKEN, dados, png, meta], function(res) {
+        btn.disabled = false; btn.textContent = "Assinar documento";
+        if (!res || res.erro) {
+          if (res && res.erros) {
+            Object.keys(res.erros).forEach(function(k) {
+              var el = $("c-" + k), m = $("m-" + k);
+              if (el) el.classList.add("invalido"); if (m) m.textContent = res.erros[k];
+            });
+          }
+          return erro((res && res.msg) || "Não foi possível assinar agora.");
+        }
+        $("tela-assinar").classList.add("oculto");
+        $("tela-pronto").classList.remove("oculto");
+        $("pronto-codigo").textContent = res.codigo;
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        if (res.concluido) {
+          pdfBase64 = res.pdfBase64; pdfNome = res.nomeArquivo || pdfNome;
+          $("pronto-icone").textContent = "🎉";
+          $("pronto-titulo").textContent = "Documento concluído!";
+          $("pronto-txt").textContent = "Você foi a última pessoa a assinar. Todas as assinaturas foram feitas." + (res.emailEnviado ? " Enviamos o PDF por e-mail." : "");
+          $("btn-reverificar2").classList.add("oculto");
+          var b = $("btn-baixar"); b.classList.remove("oculto"); b.textContent = "Baixar o PDF assinado"; b.onclick = function() { baixar(pdfBase64, pdfNome); };
+          $("pronto-aviso").textContent = "Baixe e guarde o PDF. Se precisar dele depois, abra este mesmo link.";
+        } else {
+          $("pronto-icone").textContent = "✅";
+          $("pronto-titulo").textContent = "Assinatura registrada!";
+          $("pronto-txt").textContent = "Falta" + (res.pendentes.length === 1 ? "" : "m") + " assinar: " + (listaNomes(res.pendentes) || "—") + ". Quando todos assinarem, o PDF fica disponível neste mesmo link.";
+          pdfBase64 = res.pdfBase64 || ""; pdfNome = res.nomeArquivo || pdfNome;
+          var bq = $("btn-baixar");
+          if (pdfBase64) { bq.classList.remove("oculto"); bq.textContent = "Baixar o PDF parcial"; bq.onclick = function() { baixar(pdfBase64, pdfNome); }; }
+          else bq.classList.add("oculto");
+          $("btn-reverificar2").classList.remove("oculto");
+          $("pronto-aviso").textContent = "O PDF parcial mostra as assinaturas feitas até agora; o que falta aparece como \u201Caguardando assinatura\u201D.";
+        }
+      }, function() {
+        btn.disabled = false; btn.textContent = "Assinar documento";
+        erro("Erro de conexão. Confira a internet e tente de novo. Se já tiver tocado em assinar, aguarde um instante e abra o link novamente antes de repetir.");
+      });
+    });
+
+    function baixar(b64, nome) {
+      try {
+        var bin = atob(b64), arr = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+        var url = URL.createObjectURL(new Blob([arr], { type: "application/pdf" }));
+        var a = document.createElement("a"); a.href = url; a.download = nome || "documento-assinado.pdf"; a.target = "_blank";
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(function() { URL.revokeObjectURL(url); }, 8000);
+      } catch (e) { alert("Não foi possível abrir o PDF neste aparelho."); }
+    }
+  </script>
+</body>
+</html>
