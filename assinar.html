@@ -268,7 +268,7 @@
       var hoje = new Date().toLocaleDateString("pt-BR");
       var sistema = {
         DATA_ENVIO: doc.dataEnvio || hoje, DATA_ENVIO_EXTENSO: doc.dataEnvioExtenso || hoje,
-        DATA_ASSINATURA: "(data da conclusão)", HORA_ASSINATURA: "(hora da conclusão)", CODIGO: doc.codigo,
+        DATA_ASSINATURA: "(data da conclusão)", DATA_ASSINATURA_EXTENSO: "(data da conclusão)", HORA_ASSINATURA: "(hora da conclusão)", CODIGO: doc.codigo,
         HASH: "(gerado ao concluir)", TITULO: doc.titulo, LOGO: ""
       };
       var alvo = $("doc"); alvo.innerHTML = "";
