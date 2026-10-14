@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v.2.8.0 — Página pública de ASSINATURA ELETRÔNICA (MEL-0010, Fase 1). HTML comum (GitHub Pages), sem moldura do Apps Script:
+<!-- v.2.9.1 — Página pública de ASSINATURA ELETRÔNICA (MEL-0010, Fase 1). HTML comum (GitHub Pages), sem moldura do Apps Script:
      funciona dentro do WhatsApp/Instagram. Fala com o Apps Script por POST ({"api":"assinatura",...}; ver _Assinaturas.gs).
      Endereço: assinar.html?t=TOKEN  (um link para CADA signatário, criado na tela "Assinaturas" do app e enviado pelo WhatsApp). -->
 <html lang="pt-BR">
@@ -9,6 +9,18 @@
   <meta name="robots" content="noindex">
   <title>Assinatura de documento</title>
   <meta name="theme-color" content="#fffdf7">
+  <!-- Cartão do link (WhatsApp/Instagram leem estas tags SEM executar JavaScript; a página é única para todas as unidades,
+       por isso o texto não leva o nome da unidade). -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="DesenvolVi">
+  <meta property="og:title" content="Assinatura de contrato">
+  <meta property="og:description" content="Leia e assine o seu contrato">
+  <meta property="og:image" content="https://app.desenvolvi.site/FAVICON_Rede.png">
+  <meta property="og:image:width" content="721">
+  <meta property="og:image:height" content="722">
+  <meta name="twitter:card" content="summary">
+  <link rel="icon" href="https://app.desenvolvi.site/FAVICON_Rede.png">
+  <link rel="apple-touch-icon" href="https://app.desenvolvi.site/FAVICON_Rede.png">
   <style>
     :root { --cream:#fffdf7; --ink:#3b2a63; --body:#4a4458; --coral:#f58634; --terra:#d9611a; --sand:#fff3d1; --line:rgba(59,42,99,.18); }
     * { box-sizing:border-box; }
@@ -35,6 +47,9 @@
     .doc mark { background:#ffe9a8; color:#3b2a63; padding:0 3px; border-radius:4px; }
     .doc mark.cheio { background:#dff3d0; }
     .doc mark.eu { background:#ffd9b8; font-weight:700; }
+    .previa { background:#ece9f3; border:1px solid var(--line); border-radius:16px; padding:10px; max-height:70vh; overflow:auto; }
+    .previa canvas { display:block; width:100%; height:auto; background:#fff; box-shadow:0 1px 6px rgba(0,0,0,.18); margin:0 0 10px; }
+    .previa .espera { padding:34px 10px; }
     .pad { border:2px dashed rgba(59,42,99,.35); border-radius:16px; background:#fff; touch-action:none; position:relative; }
     .pad canvas { display:block; width:100%; height:180px; border-radius:14px; touch-action:none; }
     .pad .dica { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#9a93a8; pointer-events:none; font-size:15px; }
@@ -74,6 +89,7 @@
       </div>
 
       <h2 id="tit-doc">2 · Leia o documento</h2>
+      <div class="previa oculto" id="previa"></div>
       <div class="doc" id="doc" tabindex="0"></div>
 
       <h2 id="tit-ass">3 · Assine</h2>
@@ -255,6 +271,63 @@
       });
       renderDoc();
       iniciarPad();
+      if (doc.temPrevia) carregarPrevia();
+    }
+
+    // ---------- Prévia em PDF (contratos): mostra o documento com o layout real, página por página ----------
+    // Usa PDF.js (CDN) porque <iframe>/<embed> de PDF não funciona bem no navegador do WhatsApp/Instagram. Se algo falhar,
+    // a versão em texto (renderDoc) continua visível e a assinatura funciona do mesmo jeito.
+    var PDFJS_URL = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+    var PDFJS_WORKER = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+    function carregarPdfJs(ok, falha) {
+      if (window.pdfjsLib) return ok();
+      var s = document.createElement("script");
+      s.src = PDFJS_URL;
+      s.onload = function() {
+        if (!window.pdfjsLib) return falha();
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;
+        ok();
+      };
+      s.onerror = falha;
+      document.head.appendChild(s);
+    }
+
+    function carregarPrevia() {
+      var box = $("previa");
+      box.classList.remove("oculto");
+      box.innerHTML = '<div class="espera">Preparando o contrato para leitura...</div>';
+      $("doc").classList.add("oculto");
+      function voltarAoTexto() { box.classList.add("oculto"); box.innerHTML = ""; $("doc").classList.remove("oculto"); }
+      chamar("asnPublicoPrevia", [TOKEN], function(res) {
+        if (!res || res.erro || !res.pdfBase64) return voltarAoTexto();
+        carregarPdfJs(function() {
+          try {
+            var bin = atob(res.pdfBase64), bytes = new Uint8Array(bin.length);
+            for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+            window.pdfjsLib.getDocument({ data: bytes }).promise.then(function(pdf) {
+              box.innerHTML = "";
+              var larg = Math.max(280, box.clientWidth - 22);
+              var dpr = Math.min(window.devicePixelRatio || 1, 2);
+              var n = pdf.numPages, feitas = 0;
+              function pagina(num) {
+                return pdf.getPage(num).then(function(pg) {
+                  var v1 = pg.getViewport({ scale: 1 });
+                  var escala = (larg / v1.width) * dpr;
+                  var vp = pg.getViewport({ scale: escala });
+                  var cv = document.createElement("canvas");
+                  cv.width = Math.floor(vp.width); cv.height = Math.floor(vp.height);
+                  box.appendChild(cv);
+                  return pg.render({ canvasContext: cv.getContext("2d"), viewport: vp }).promise;
+                });
+              }
+              var cadeia = Promise.resolve();
+              for (var p = 1; p <= n; p++) (function(num) { cadeia = cadeia.then(function() { return pagina(num); }); })(p);
+              cadeia.catch(voltarAoTexto);
+            }).catch(voltarAoTexto);
+          } catch (e) { voltarAoTexto(); }
+        }, voltarAoTexto);
+      }, voltarAoTexto);
     }
 
     // Prévia do documento: marcadores trocados pelo que já foi informado (por mim e pelos outros signatários).
