@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v.2.9.1 — Página pública de ASSINATURA ELETRÔNICA (MEL-0010, Fase 1). HTML comum (GitHub Pages), sem moldura do Apps Script:
+<!-- v.2.9.2 — Página pública de ASSINATURA ELETRÔNICA (MEL-0010, Fase 1). HTML comum (GitHub Pages), sem moldura do Apps Script:
      funciona dentro do WhatsApp/Instagram. Fala com o Apps Script por POST ({"api":"assinatura",...}; ver _Assinaturas.gs).
      Endereço: assinar.html?t=TOKEN  (um link para CADA signatário, criado na tela "Assinaturas" do app e enviado pelo WhatsApp). -->
 <html lang="pt-BR">
@@ -89,8 +89,12 @@
       </div>
 
       <h2 id="tit-doc">2 · Leia o documento</h2>
-      <div class="previa oculto" id="previa"></div>
       <div class="doc" id="doc" tabindex="0"></div>
+      <div class="previa oculto" id="previa"></div>
+      <div id="alterna-previa" class="oculto" style="margin-top:8px">
+        <button type="button" class="link" id="btn-previa" style="font-size:13px;font-weight:600;color:var(--body);padding:2px 0">Ver prévia do PDF</button>
+        <span class="nota" id="nota-previa" style="display:block;margin-top:2px;font-size:12.5px">Ao assinar, o PDF do contrato é gerado automaticamente. A prévia serve apenas para visualizar o layout.</span>
+      </div>
 
       <h2 id="tit-ass">3 · Assine</h2>
       <p class="sub">Desenhe a sua assinatura no quadro com o dedo (ou o mouse).</p>
@@ -271,7 +275,11 @@
       });
       renderDoc();
       iniciarPad();
-      if (doc.temPrevia) carregarPrevia();
+      if (doc.temPrevia) {
+        mostrarTexto();
+        $("btn-previa").onclick = alternarPrevia;
+        $("alterna-previa").classList.remove("oculto");
+      }
     }
 
     // ---------- Prévia em PDF (contratos): mostra o documento com o layout real, página por página ----------
@@ -293,28 +301,47 @@
       document.head.appendChild(s);
     }
 
-    function carregarPrevia() {
+    // A página SEMPRE abre com o texto do contrato (rápido). A prévia em PDF só é gerada se a pessoa trocar o chaveamento
+    // que fica depois do texto; depois de carregada, alternar entre texto e PDF é instantâneo.
+    var previaEstado = { modo: "texto", carregada: false, carregando: false };
+
+    function mostrarTexto() {
+      previaEstado.modo = "texto";
+      $("previa").classList.add("oculto");
+      $("doc").classList.remove("oculto");
+      $("btn-previa").textContent = "Ver prévia do PDF";
+    }
+
+    function alternarPrevia() {
+      if (previaEstado.modo === "pdf") return mostrarTexto();
+      previaEstado.modo = "pdf";
+      $("btn-previa").textContent = "Ver como texto";
+      $("doc").classList.add("oculto");
       var box = $("previa");
       box.classList.remove("oculto");
-      box.innerHTML = '<div class="espera">Preparando o contrato para leitura...</div>';
-      $("doc").classList.add("oculto");
-      function voltarAoTexto() { box.classList.add("oculto"); box.innerHTML = ""; $("doc").classList.remove("oculto"); }
+      if (previaEstado.carregada || previaEstado.carregando) return;
+      previaEstado.carregando = true;
+      box.innerHTML = '<div class="espera">Preparando a prévia do PDF...</div>';
+      function falhou() {
+        previaEstado.carregando = false;
+        box.innerHTML = "";
+        mostrarTexto();
+        $("nota-previa").textContent = "Não foi possível preparar a prévia agora. Você pode assinar normalmente: o PDF é gerado automaticamente ao assinar.";
+      }
       chamar("asnPublicoPrevia", [TOKEN], function(res) {
-        if (!res || res.erro || !res.pdfBase64) return voltarAoTexto();
+        if (!res || res.erro || !res.pdfBase64) return falhou();
         carregarPdfJs(function() {
           try {
             var bin = atob(res.pdfBase64), bytes = new Uint8Array(bin.length);
             for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
             window.pdfjsLib.getDocument({ data: bytes }).promise.then(function(pdf) {
               box.innerHTML = "";
-              var larg = Math.max(280, box.clientWidth - 22);
+              var larg = Math.max(280, (box.clientWidth || 320) - 22);
               var dpr = Math.min(window.devicePixelRatio || 1, 2);
-              var n = pdf.numPages, feitas = 0;
               function pagina(num) {
                 return pdf.getPage(num).then(function(pg) {
                   var v1 = pg.getViewport({ scale: 1 });
-                  var escala = (larg / v1.width) * dpr;
-                  var vp = pg.getViewport({ scale: escala });
+                  var vp = pg.getViewport({ scale: (larg / v1.width) * dpr });
                   var cv = document.createElement("canvas");
                   cv.width = Math.floor(vp.width); cv.height = Math.floor(vp.height);
                   box.appendChild(cv);
@@ -322,14 +349,13 @@
                 });
               }
               var cadeia = Promise.resolve();
-              for (var p = 1; p <= n; p++) (function(num) { cadeia = cadeia.then(function() { return pagina(num); }); })(p);
-              cadeia.catch(voltarAoTexto);
-            }).catch(voltarAoTexto);
-          } catch (e) { voltarAoTexto(); }
-        }, voltarAoTexto);
-      }, voltarAoTexto);
+              for (var p = 1; p <= pdf.numPages; p++) (function(num) { cadeia = cadeia.then(function() { return pagina(num); }); })(p);
+              cadeia.then(function() { previaEstado.carregada = true; previaEstado.carregando = false; }).catch(falhou);
+            }).catch(falhou);
+          } catch (e) { falhou(); }
+        }, falhou);
+      }, falhou);
     }
-
     // Prévia do documento: marcadores trocados pelo que já foi informado (por mim e pelos outros signatários).
     function renderDoc() {
       var valores = {}, meusMarcadores = {}, rotulos = {};
