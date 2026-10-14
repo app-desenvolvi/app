@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v.2.9.2 — Página pública de ASSINATURA ELETRÔNICA (MEL-0010, Fase 1). HTML comum (GitHub Pages), sem moldura do Apps Script:
+<!-- v.2.9.3 — Página pública de ASSINATURA ELETRÔNICA (MEL-0010, Fase 1). HTML comum (GitHub Pages), sem moldura do Apps Script:
      funciona dentro do WhatsApp/Instagram. Fala com o Apps Script por POST ({"api":"assinatura",...}; ver _Assinaturas.gs).
      Endereço: assinar.html?t=TOKEN  (um link para CADA signatário, criado na tela "Assinaturas" do app e enviado pelo WhatsApp). -->
 <html lang="pt-BR">
@@ -209,6 +209,27 @@
       }, function() { b.disabled = false; $("pronto-aviso").textContent = "Erro de conexão. Tente novamente."; });
     }
 
+    // Abre o PDF direto no navegador (visualizador do aparelho). Devolve false se não conseguiu; aí o botão da página resolve.
+    function abrirPdfDireto(b64, nome) {
+      try {
+        var bin = atob(b64), arr = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+        var url = URL.createObjectURL(new Blob([arr], { type: "application/pdf" }));
+        window.location.href = url;
+        return true;
+      } catch (e) { return false; }
+    }
+
+    // Busca o PDF final no servidor e abre direto. Mostra uma mensagem enquanto prepara.
+    function abrirPdfDoServidor(aviso) {
+      var el = $("pronto-aviso");
+      if (aviso && el) el.textContent = aviso;
+      chamar("asnPublicoBaixar", [TOKEN], function(r) {
+        if (!r || r.erro || !r.pdfBase64) { if (el) el.textContent = (r && r.msg) || "Não foi possível abrir o PDF agora. Toque no botão para tentar de novo."; return; }
+        pdfBase64 = r.pdfBase64; pdfNome = r.nomeArquivo || pdfNome;
+        if (!abrirPdfDireto(pdfBase64, pdfNome) && el) el.textContent = "Toque em “Baixar o PDF assinado” para abrir o documento.";
+      }, function() { if (el) el.textContent = "Erro de conexão. Toque no botão para tentar de novo."; });
+    }
     function telaConcluido(res) {
       $("tela-pronto").classList.remove("oculto");
       $("pronto-icone").textContent = "✅";
@@ -216,7 +237,8 @@
       $("pronto-txt").textContent = "Todas as assinaturas de “" + res.titulo + "” foram feitas.";
       $("pronto-codigo").textContent = res.codigo || "";
       $("btn-reverificar2").classList.add("oculto");
-      var b = $("btn-baixar"); b.classList.remove("oculto"); b.textContent = "Baixar o PDF assinado";
+      var b = $("btn-baixar"); b.classList.remove("oculto"); b.textContent = "Abrir o PDF assinado";
+      abrirPdfDoServidor("Abrindo o PDF assinado...");
       b.onclick = function() {
         if (pdfBase64) return baixar(pdfBase64, pdfNome);
         b.disabled = true;
@@ -489,8 +511,9 @@
           $("pronto-titulo").textContent = "Documento concluído!";
           $("pronto-txt").textContent = "Você foi a última pessoa a assinar. Todas as assinaturas foram feitas." + (res.emailEnviado ? " Enviamos o PDF por e-mail." : "");
           $("btn-reverificar2").classList.add("oculto");
-          var b = $("btn-baixar"); b.classList.remove("oculto"); b.textContent = "Baixar o PDF assinado"; b.onclick = function() { baixar(pdfBase64, pdfNome); };
-          $("pronto-aviso").textContent = "Baixe e guarde o PDF. Se precisar dele depois, abra este mesmo link.";
+          var b = $("btn-baixar"); b.classList.remove("oculto"); b.textContent = "Abrir o PDF assinado"; b.onclick = function() { if (!abrirPdfDireto(pdfBase64, pdfNome)) baixar(pdfBase64, pdfNome); };
+          $("pronto-aviso").textContent = "Abrindo o PDF assinado... Guarde o arquivo. Se precisar dele depois, abra este mesmo link.";
+          setTimeout(function() { if (!abrirPdfDireto(pdfBase64, pdfNome)) $("pronto-aviso").textContent = "Toque em “Abrir o PDF assinado” para ver o documento."; }, 400);
         } else {
           $("pronto-icone").textContent = "✅";
           $("pronto-titulo").textContent = "Assinatura registrada!";
