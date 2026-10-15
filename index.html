@@ -464,7 +464,10 @@
     function estaRodandoComoApp() {
       var condicaoMedia = window.matchMedia('(display-mode: standalone)').matches;
       var condicaoIos = navigator.standalone === true;
-      var condicaoStorage = localStorage.getItem(CHAVE_PWA_) === 'true';
+      var condicaoStorage = false;
+      try {
+        condicaoStorage = localStorage.getItem(CHAVE_PWA_) === 'true';
+      } catch (e) {}
       // 🚀 Sem persistência de fechar: O botão só some permanentemente se estiver instalado!
       return condicaoMedia || condicaoIos || condicaoStorage;
     }
@@ -473,6 +476,10 @@
     function detectarDispositivo() {
       var ua = navigator.userAgent || navigator.vendor || window.opera;
       if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
+        return "IOS";
+      }
+      // iPad recente se identifica como Mac: o toque na tela o diferencia de um computador.
+      if (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) {
         return "IOS";
       }
       if (/android/i.test(ua)) {
@@ -485,12 +492,14 @@
     document.addEventListener("DOMContentLoaded", function() {
       // 🚀 SE JÁ INSTALADO: Aborta antes de mostrar o contêiner
       if (estaRodandoComoApp()) {
-        localStorage.setItem(CHAVE_PWA_, 'true');
+        try { localStorage.setItem(CHAVE_PWA_, 'true'); } catch (e) {}
         console.log("⚡ DesenvolVi: PWA já instalado. Botão flutuante desativado.");
-        return; 
+        return;
       }
 
       plataformaMovel = detectarDispositivo();
+      // Computador: o botão flutuante não aparece (a instalação pelo navegador continua disponível no ícone da barra).
+      if (plataformaMovel === "DESKTOP") return;
       var containerPwa = document.getElementById("pwa-install-btn");
 
       // [ IOS ] Se for iOS: Mostra o contêiner sempre (pois a Apple não possui o gatilho 'beforeinstallprompt')
