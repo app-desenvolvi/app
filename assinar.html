@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v.2.9.3 — Página pública de ASSINATURA ELETRÔNICA (MEL-0010, Fase 1). HTML comum (GitHub Pages), sem moldura do Apps Script:
+<!-- v.2.9.6 — Página pública de ASSINATURA ELETRÔNICA (MEL-0010, Fase 1). HTML comum (GitHub Pages), sem moldura do Apps Script:
      funciona dentro do WhatsApp/Instagram. Fala com o Apps Script por POST ({"api":"assinatura",...}; ver _Assinaturas.gs).
      Endereço: assinar.html?t=TOKEN  (um link para CADA signatário, criado na tela "Assinaturas" do app e enviado pelo WhatsApp). -->
 <html lang="pt-BR">
@@ -179,9 +179,17 @@
     function telaAguardar(res) {
       $("tela-aguardar").classList.remove("oculto");
       $("aguardar-titulo").textContent = res.titulo;
-      $("aguardar-txt").textContent = "Olá" + (res.nome ? ", " + res.nome.split(" ")[0] : "") + "! O documento ainda está sendo preenchido por " +
-        (listaNomes(res.aguardandoDados) || "outra pessoa") + ". Assim que essa pessoa assinar, você poderá ler o documento completo e assinar. " +
-        "Volte a este mesmo link mais tarde.";
+      var ola = "Olá" + (res.nome ? ", " + res.nome.split(" ")[0] : "") + "! ";
+      if (res.porOrdem) {
+        // documento com ordem de assinatura: ainda não é a vez desta pessoa
+        $("aguardar-txt").textContent = ola + "Ainda não é a sua vez de assinar. Esta assinatura acontece depois de " +
+          (listaNomes(res.aguardandoDados) || "outra pessoa") + ". Assim que essa pessoa assinar, este mesmo link será liberado para você. " +
+          "Volte a este mesmo link mais tarde.";
+      } else {
+        $("aguardar-txt").textContent = ola + "O documento ainda está sendo preenchido por " +
+          (listaNomes(res.aguardandoDados) || "outra pessoa") + ". Assim que essa pessoa assinar, você poderá ler o documento completo e assinar. " +
+          "Volte a este mesmo link mais tarde.";
+      }
     }
     $("btn-reverificar").addEventListener("click", carregar);
     $("btn-reverificar2").addEventListener("click", carregar);
