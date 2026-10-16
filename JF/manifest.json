@@ -1,0 +1,19 @@
+{
+  "id": "/JF/",
+  "short_name": "FisioAmandaBaio",
+  "name": "FisioAmandaBaio - JF",
+  "icons": [
+    {
+      "src": "https://app-desenvolvi.github.io/app/FAVICON_AB.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./",
+  "scope": "./",
+  "background_color": "#101828",
+  "theme_color": "#66B7B4",
+  "display": "standalone",
+  "orientation": "portrait"
+}

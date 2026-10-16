@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<!-- GERADO por publicar-site.ps1 a partir da home.html (unidade TESTE). NAO edite aqui: edite a home.html. -->
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AppDesenvolVi</title>
+
+  <!-- 🎟️ Links do evento (?page=inscricao e ?page=ingresso) vão para a página enxuta evento.html, sem PWA nem os
+       outros recursos do app. Fica no topo para redirecionar antes de qualquer outra coisa carregar. -->
+  <script>
+    (function () {
+      var p = (new URLSearchParams(window.location.search).get('page') || '').toLowerCase();
+      if (p === 'inscricao' || p === 'ingresso') window.location.replace('../evento.html' + window.location.search);
+    })();
+  </script>
+
+  <!-- 🚀 Link para o manifesto PWA do seu próprio domínio -->
+  <!-- O <link rel="manifest"> é escrito pelo script abaixo JÁ com o manifest da unidade (o Safari/iOS lê o
+       manifest assim que a tag aparece no HTML; trocar o href depois não é considerado). -->
+  <meta name="theme-color" content="#9966FF" id="meta-theme-color">
+
+  <!-- Ícones para compatibilidade iOS Safari -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="AppDesenvolVi" id="meta-apple-title">
+  <link rel="apple-touch-icon" href="https://app-desenvolvi.github.io/app/FAVICON_Rede.png" id="link-apple-icon">
+
+  <script>
+    // 🏢 Identidade de cada unidade, escolhida por ?unidade=... ANTES da 1ª pintura: cor de fundo, nome do
+    // atalho, ícone (iOS) e manifest (Android). O nome da unidade tem que ser EXATO (mesma regra do resto do
+    // app: sem normalização/apelido). Página estática (GitHub Pages) — não lê a planilha ao vivo, por isso
+    // este mapa é atualizado à mão (cor = coluna COR_PRIMARIA de CONFIGURAÇÕES).
+    // Para dar ícone próprio a uma unidade: suba o PNG no repositório, troque "icone" aqui E o "src" no
+    // manifest-<unidade>.json correspondente (o Android lê o manifest, o iPhone lê o "icone" daqui).
+    var ICONE_PADRAO_ = "https://app-desenvolvi.github.io/app/FAVICON_Rede.png";
+    var UNIDADES_ = {
+      "TESTE": { cor: "#0C2C60", nome: "Rede DesenvolVi",   icone: "https://app-desenvolvi.github.io/app/FAVICON_Rede.png", manifest: "manifest-teste.json" },
+      "JF":    { cor: "#66B7B4", nome: "FisioAmandaBaio",   icone: "https://app-desenvolvi.github.io/app/FAVICON_AB.png",   manifest: "manifest-jf.json" },
+      "SJC":   { cor: "#9966FF", nome: "DesenvolVi",  icone: "https://app-desenvolvi.github.io/app/FAVICON_DesenvolVi.png",   manifest: "manifest-sjc.json" }
+    };
+    var UNIDADE_PADRAO_ = { cor: "#9966FF", nome: "AppDesenvolVi", icone: ICONE_PADRAO_, manifest: "manifest.json" };
+    var UNIDADE_URL_ = "TESTE";
+    var PERFIL_UNIDADE_ = UNIDADES_[UNIDADE_URL_] || UNIDADE_PADRAO_;
+
+    (function aplicarIdentidadeDaUnidade() {
+      document.documentElement.style.setProperty('--cor-fundo-home', PERFIL_UNIDADE_.cor);
+      var meta = document.getElementById('meta-theme-color');
+      if (meta) meta.setAttribute('content', PERFIL_UNIDADE_.cor);
+      document.title = PERFIL_UNIDADE_.nome; // o iOS cai no <title> quando não lê o nome do manifest/meta
+      document.write('<link rel="manifest" href="manifest.json">');
+      document.getElementById('link-apple-icon').setAttribute('href', PERFIL_UNIDADE_.icone);
+      document.getElementById('meta-apple-title').setAttribute('content', PERFIL_UNIDADE_.nome);
+    })();
+  </script>
+
+  <!-- Biblioteca de ícones simples -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <style>
+    /* Reset de Hardware e Layout em tela cheia */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--cor-fundo-home, #9966FF);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      display: flex;
+      flex-direction: column; /* faixa de aviso (opcional) em cima, iframe ocupa o resto */
+    }
+
+    /* Iframe Responsivo */
+    .app-iframe {
+      width: 100%;
+      flex: 1 1 auto;
+      min-height: 0;
+      border: none;
+      display: block;
+    }
+
+    /* 📣 FAIXA DE AVISO NO TOPO (estilo do aviso do Apps Script) — fechada uma vez, fica fechada na sessão */
+    .faixa-aviso {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 9px 40px 9px 16px;
+      background: #F1F3F4;
+      border-bottom: 1px solid #DADCE0;
+      color: #3C4043;
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-align: center;
+      line-height: 1.3;
+    }
+    .faixa-aviso-fechar {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: none;
+      color: #5F6368;
+      font-size: 1.3rem;
+      line-height: 1;
+      cursor: pointer;
+      border-radius: 50%;
+    }
+    .faixa-aviso-fechar:hover { background: rgba(0, 0, 0, 0.08); }
+
+    /* 🚀 BOTÃO FLUTUANTE DO PWA (Floating Action Button) */
+    .pwa-fab {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: linear-gradient(135deg, #9966FF 0%, #7D40FF 100%);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 14px 22px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 16px rgba(153, 102, 255, 0.4);
+      cursor: pointer;
+      display: none; /* Inicialmente oculto, aparece dinamicamente */
+      align-items: center;
+      gap: 8px;
+      z-index: 9999;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .pwa-fab:active {
+      transform: scale(0.95);
+    }
+
+    /* POPUP/MODAL DE INSTALAÇÃO CUSTOMIZADO (0ms Lag) */
+    .pwa-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(16, 24, 40, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s ease, visibility 0.25s ease;
+    }
+    .pwa-modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .pwa-modal-box {
+      background: white;
+      width: 90%;
+      max-width: 360px;
+      border-radius: 20px;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      transform: translateY(20px);
+      transition: transform 0.25s ease;
+    }
+    .pwa-modal-overlay.active .pwa-modal-box {
+      transform: translateY(0);
+    }
+    .pwa-logo {
+      max-height: 60px;
+      margin-bottom: 16px;
+    }
+    .pwa-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #101828;
+      margin-bottom: 8px;
+    }
+    .pwa-text {
+      font-size: 0.85rem;
+      color: #667085;
+      line-height: 1.4;
+      margin-bottom: 20px;
+    }
+
+    /* Elementos das plataformas */
+    .pwa-android-btn {
+      background: #2ecc71;
+      color: white;
+      border: none;
+      width: 100%;
+      padding: 14px;
+      font-weight: bold;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(46, 204, 113, 0.2);
+    }
+    .pwa-ios-instructions {
+      text-align: left;
+      background: #F2F4F7;
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 0.82rem;
+    }
+    .pwa-ios-step {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      color: #344054;
+    }
+    .pwa-ios-step:last-child {
+      margin-bottom: 0;
+    }
+    .pwa-badge {
+      background: #9966FF;
+      color: white;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: bold;
+      margin-right: 8px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .pwa-close-btn {
+      margin-top: 16px;
+      background: none;
+      border: none;
+      color: #98A2B3;
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 📣 FAIXA DE AVISO: aparece a cada carregamento da página; o X só a esconde até recarregar -->
+  <div id="faixa-aviso" class="faixa-aviso" role="status">
+<img src="https://app-desenvolvi.github.io/app/Rede_DesenvolVi.png"               style="width: 150px">
+    <span>REDE DE PROFISSIONAIS PELO DESENVOLVIMENTO INFANTIL</span>
+    <button type="button" class="faixa-aviso-fechar" aria-label="Fechar aviso" onclick="fecharFaixaAviso()">&times;</button>
+  </div>
+  <script>
+    // O X só esconde a faixa nesta carga da página; ao recarregar, ela aparece de novo (nada é gravado).
+    function fecharFaixaAviso() {
+      document.getElementById('faixa-aviso').style.display = 'none';
+    }
+  </script>
+
+  <!-- 🌐 IFRAME DA SUA APLICAÇÃO GOOGLE APPS SCRIPT -->
+  <!-- 🚀 O src é montado por JS abaixo, repassando ?page=... etc. que vierem na URL desta página -->
+  <iframe
+    id="app-iframe"
+    class="app-iframe"
+    allow="clipboard-write; camera">
+  </iframe>
+
+  <!-- 📷 LEITOR DE QR-CODE (check-in do evento). A câmera NÃO funciona dentro do iframe do Apps Script (o Google não
+       libera), então o app pede e este leitor abre aqui, no topo da janela, e devolve o texto lido por postMessage. -->
+  <style>
+    #hm-scanner { display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(12, 12, 20, 0.96); flex-direction: column; align-items: center; justify-content: center; padding: 16px; color: #fff; }
+    #hm-scanner.aberto { display: flex; }
+    #hm-scanner h3 { font-size: 1.05rem; margin-bottom: 14px; text-align: center; }
+    #hm-leitor { width: min(92vw, 420px); border-radius: 16px; overflow: hidden; background: #000; min-height: 200px; }
+    #hm-scanner p { font-size: 0.85rem; opacity: 0.8; margin-top: 12px; text-align: center; max-width: 420px; }
+    #hm-scanner button { margin-top: 18px; border: 0; border-radius: 999px; padding: 12px 34px; font-size: 1rem; font-weight: 700; background: #fff; color: #222; cursor: pointer; }
+  </style>
+  <div id="hm-scanner" role="dialog" aria-modal="true" aria-label="Leitor de QR-Code">
+    <h3>Aponte a câmera para o QR-Code do ingresso</h3>
+    <div id="hm-leitor"></div>
+    <p id="hm-scanner-msg">Aguardando a câmera...</p>
+    <button type="button" onclick="fecharScannerQr_(true)">Cancelar</button>
+  </div>
+
+  <!-- 🚀 BOTÃO FLUTUANTE DE INSTALAÇÃO -->
+  <button id="pwa-install-btn" class="pwa-fab" onclick="abrirInstaladorPWA()">
+    <i class="bi bi-phone-vibrate-fill"></i> Instalar App
+  </button>
+
+  <!-- 📱 POPUP DE INSTALAÇÃO MULTI-PLATAFORMA -->
+  <div id="pwa-modal" class="pwa-modal-overlay" onclick="fecharInstaladorPWA(event)">
+    <div class="pwa-modal-box" onclick="event.stopPropagation()">
+      <img src="https://app-desenvolvi.github.io/app/FAVICON_Rede.png" alt="Logo" class="pwa-logo">
+      <div class="pwa-title">Instalar o AppDesenvolVi</div>
+      <p class="pwa-text">Fixe o aplicativo direto na tela inicial do seu celular para ter carregamento instantâneo, visual em tela cheia e performance otimizada!</p>
+
+      <!-- Divisão Reativa Android -->
+      <div id="pwa-box-android" style="display: none;">
+        <button class="pwa-android-btn" onclick="executarInstalacaoAndroid()">
+          <i class="bi bi-download"></i> INSTALAR AGORA
+        </button>
+      </div>
+
+      <!-- Divisão Reativa iOS (Safari) -->
+      <div id="pwa-box-ios" style="display: none;">
+        <div class="pwa-ios-instructions">
+          <div class="pwa-ios-step">
+            <span class="pwa-badge">1</span>
+            <span>Toque no botão de <b>Compartilhar</b> <i class="bi bi-box-arrow-up" style="color: #9966FF;"></i> (na barra inferior do Safari).</span>
+          </div>
+          <div class="pwa-ios-step" style="margin-top: 8px;">
+            <span class="pwa-badge">2</span>
+            <span>Role as opções para baixo e selecione <b>Adicionar à Tela de Início</b> <i class="bi bi-plus-square" style="color: #9966FF;"></i>.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Divisão Reativa de Fallback (Navegadores de redes sociais) -->
+      <div id="pwa-box-fallback" style="display: none;">
+        <div style="background: #FEF3C7; color: #D97706; padding: 12px; border-radius: 8px; font-size: 0.8rem; text-align: left;">
+          <i class="bi bi-exclamation-triangle-fill"></i> Para realizar a instalação, abra este link usando o navegador nativo do celular (<b>Google Chrome</b> no Android ou <b>Safari</b> no iOS).
+        </div>
+      </div>
+
+      <button class="pwa-close-btn" onclick="fecharInstaladorPWA(null)">Depois</button>
+    </div>
+  </div>
+
+<script>
+    // --- 0. MONTA O SRC DO IFRAME, REPASSANDO OS PARÂMETROS DA URL DESTA PÁGINA (?page=recibo&r=..., etc.) ---
+    // Assim, um link enviado ao cliente como https://app-desenvolvi.github.io/app/?page=recibo&r=abc123
+    // abre aqui dentro exatamente a mesma tela, só que sem o aviso padrão do Google.
+    (function montarSrcIframe() {
+      var URL_BASE_EXEC = "https://script.google.com/macros/s/AKfycbytQm1L6r_0wrZM1mXiTO2HFM_DAfd2tDEF6h7OVxYS0xWfUG5j0y_zGVz-zOLyT1w-/exec";
+      var qp_ = new URLSearchParams(window.location.search); qp_.set('unidade', 'TESTE'); var query = '?' + qp_.toString(); // ex.: "?page=recibo&r=abc123", ou "" se não houver nada
+      document.getElementById('app-iframe').src = URL_BASE_EXEC + query;
+    })();
+
+    // 🎨 Depois do login, o app (dentro do iframe) manda a cor REAL da unidade puxada da planilha
+    // (não é mais só o palpite do ?unidade= da URL). Aqui a gente repinta o fundo com essa cor definitiva.
+    window.addEventListener('message', function(event) {
+      var origemValida = /\.googleusercontent\.com$/.test(event.origin) || event.origin === 'https://script.google.com';
+      if (!origemValida) return;
+      if (!event.data || event.data.fonte !== 'desenvolvi-app') return;
+      var cor = event.data.corPrimaria;
+      if (!/^#[0-9A-Fa-f]{6}$/.test(String(cor || ''))) return;
+      document.documentElement.style.setProperty('--cor-fundo-home', cor);
+      var meta = document.getElementById('meta-theme-color');
+      if (meta) meta.setAttribute('content', cor);
+    });
+
+    // 📷 PONTE DO LEITOR DE QR-CODE (tela "Check-in do evento" do app)
+    // O app (iframe → moldura do Apps Script → iframe interno) pede com {fonte:'desenvolvi-app', tipo:'evtAbrirScanner'}.
+    // Aqui, no topo da janela, a câmera é permitida. O resultado volta para o app por postMessage, difundido para
+    // todas as molduras dentro do iframe (o app está 2 ou 3 níveis abaixo e só ele reage a 'desenvolvi-home').
+    var scannerQr_ = null;
+
+    function difundirParaApp_(msg) {
+      function descer(janela, nivel) {
+        if (nivel > 4) return;
+        var n = 0;
+        try { n = janela.length; } catch (e) { return; }
+        for (var i = 0; i < n; i++) {
+          var filha;
+          try { filha = janela[i]; } catch (e) { continue; }
+          try { filha.postMessage(msg, '*'); } catch (e) {}
+          descer(filha, nivel + 1);
+        }
+      }
+      var ifr = document.getElementById('app-iframe');
+      if (!ifr || !ifr.contentWindow) return;
+      try { ifr.contentWindow.postMessage(msg, '*'); } catch (e) {}
+      descer(ifr.contentWindow, 0);
+    }
+
+    function fecharScannerQr_(avisar) {
+      var s = scannerQr_;
+      scannerQr_ = null;
+      document.getElementById('hm-scanner').classList.remove('aberto');
+      if (s) { s.stop().then(function() { try { s.clear(); } catch (e) {} }).catch(function() {}); }
+    }
+
+    function abrirScannerQr_() {
+      if (scannerQr_) return;
+      var painel = document.getElementById('hm-scanner');
+      var msg = document.getElementById('hm-scanner-msg');
+      msg.textContent = 'Aguardando a câmera...';
+      painel.classList.add('aberto');
+
+      function iniciar() {
+        if (typeof Html5Qrcode === 'undefined') {
+          msg.textContent = 'O leitor não carregou. Feche e use a busca por código, nome ou celular.';
+          difundirParaApp_({ fonte: 'desenvolvi-home', tipo: 'evtScannerErro', msg: 'O leitor de QR-Code não carregou.' });
+          return;
+        }
+        var leitor = new Html5Qrcode('hm-leitor');
+        scannerQr_ = leitor;
+        leitor.start(
+          { facingMode: 'environment' },
+          { fps: 10, qrbox: function(w, h) { var s = Math.floor(Math.min(w, h) * 0.7); return { width: s, height: s }; } },
+          function(texto) {
+            if (scannerQr_ !== leitor) return;       // já tratado
+            if (navigator.vibrate) navigator.vibrate(60);
+            fecharScannerQr_(false);
+            difundirParaApp_({ fonte: 'desenvolvi-home', tipo: 'evtQrLido', texto: String(texto || '').slice(0, 200) });
+          },
+          function() {}
+        ).then(function() {
+          msg.textContent = 'Posicione o QR-Code dentro do quadrado.';
+        }).catch(function(err) {
+          scannerQr_ = null;
+          var m = (err && err.message) ? err.message : String(err);
+          msg.textContent = 'Não foi possível abrir a câmera. Libere a permissão no navegador.';
+          difundirParaApp_({ fonte: 'desenvolvi-home', tipo: 'evtScannerErro', msg: m });
+          setTimeout(function() { fecharScannerQr_(false); }, 2500);
+        });
+      }
+
+      if (typeof Html5Qrcode !== 'undefined') { iniciar(); return; }
+      var sc = document.createElement('script');
+      sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js';
+      sc.onload = iniciar;
+      sc.onerror = iniciar;
+      document.head.appendChild(sc);
+    }
+
+    window.addEventListener('message', function(event) {
+      var origemValida = /\.googleusercontent\.com$/.test(event.origin) || event.origin === 'https://script.google.com';
+      if (!origemValida) return;
+      if (!event.data || event.data.fonte !== 'desenvolvi-app' || event.data.tipo !== 'evtAbrirScanner') return;
+      difundirParaApp_({ fonte: 'desenvolvi-home', tipo: 'evtScannerPronto' });   // avisa o app que a ponte existe
+      abrirScannerQr_();
+    });
+
+    // --- 1. REGISTRO DO SERVICE WORKER NO SEU PRÓPRIO DOMÍNIO ---
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('../service-worker.js')
+          .then(function(reg) { console.log('SW ativo com sucesso!', reg.scope); })
+          .catch(function(err) { console.error('Falha ao registrar SW:', err); });
+      });
+    }
+
+    // --- 2. CONTROLE DO FLUXO DE INSTALAÇÃO ---
+    // A marca de "já instalado" é por unidade: instalar o atalho da JF não pode esconder o botão da SJC.
+    var CHAVE_PWA_ = 'pwa_instalado_' + (UNIDADE_URL_ || 'PADRAO');
+    var eventoInstalacaoNativa = null;
+    var plataformaMovel = "FALLBACK";
+
+    // 🚀 DETECTA SE O APP JÁ ESTÁ INSTALADO OU RODANDO COMO PWA
+    function estaRodandoComoApp() {
+      var condicaoMedia = window.matchMedia('(display-mode: standalone)').matches;
+      var condicaoIos = navigator.standalone === true;
+      var condicaoStorage = false;
+      try {
+        condicaoStorage = localStorage.getItem(CHAVE_PWA_) === 'true';
+      } catch (e) {}
+      // 🚀 Sem persistência de fechar: O botão só some permanentemente se estiver instalado!
+      return condicaoMedia || condicaoIos || condicaoStorage;
+    }
+
+    // Detecta o sistema operacional do usuário móvel
+    function detectarDispositivo() {
+      var ua = navigator.userAgent || navigator.vendor || window.opera;
+      if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
+        return "IOS";
+      }
+      // iPad recente se identifica como Mac: o toque na tela o diferencia de um computador.
+      if (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) {
+        return "IOS";
+      }
+      if (/android/i.test(ua)) {
+        return "ANDROID";
+      }
+      return "DESKTOP";
+    }
+
+    // Gerencia o botão flutuante com base na disponibilidade do sistema
+    document.addEventListener("DOMContentLoaded", function() {
+      // 🚀 SE JÁ INSTALADO: Aborta antes de mostrar o contêiner
+      if (estaRodandoComoApp()) {
+        try { localStorage.setItem(CHAVE_PWA_, 'true'); } catch (e) {}
+        console.log("⚡ DesenvolVi: PWA já instalado. Botão flutuante desativado.");
+        return;
+      }
+
+      plataformaMovel = detectarDispositivo();
+      // Computador: o botão flutuante não aparece (a instalação pelo navegador continua disponível no ícone da barra).
+      if (plataformaMovel === "DESKTOP") return;
+      var containerPwa = document.getElementById("pwa-install-btn");
+
+      // [ IOS ] Se for iOS: Mostra o contêiner sempre (pois a Apple não possui o gatilho 'beforeinstallprompt')
+      if (plataformaMovel === "IOS") {
+        if (containerPwa) containerPwa.style.display = "flex";
+      }
+
+      // [ ANDROID ] Se for Android: Ouve o gatilho oficial do Google Chrome
+      window.addEventListener("beforeinstallprompt", function(e) {
+        e.preventDefault();
+        eventoInstalacaoNativa = e;
+        if (containerPwa) containerPwa.style.display = "flex";
+      });
+    });
+
+    // ❌ OCULTA O BOTÃO APENAS PARA A VISITA ATUAL (REAPARECE AO CARREGAR NOVAMENTE)
+    function fecharBotaoFlutuantePermanente(e) {
+      if (e) e.preventDefault();
+      var containerPwa = document.getElementById("pwa-install-btn");
+      if (containerPwa) {
+        containerPwa.style.display = "none";
+      }
+      // 🚀 Zero persistência física em disco! O estado reside estritamente na memória desta carga de página.
+      console.log("⚡ DesenvolVi: Botão ocultado temporariamente. Ele reaparecerá no próximo carregamento.");
+    }
+
+    // Abre o Modal com os passos de instalação corretos de cada SO
+    function abrirInstaladorPWA() {
+      document.getElementById("pwa-box-android").style.display = "none";
+      document.getElementById("pwa-box-ios").style.display = "none";
+      document.getElementById("pwa-box-fallback").style.display = "none";
+
+      if (plataformaMovel === "IOS") {
+        document.getElementById("pwa-box-ios").style.display = "block";
+      } else if (plataformaMovel === "ANDROID" && eventoInstalacaoNativa) {
+        document.getElementById("pwa-box-android").style.display = "block";
+      } else {
+        document.getElementById("pwa-box-fallback").style.display = "block";
+      }
+
+      document.getElementById("pwa-modal").classList.add("active");
+    }
+
+    // Executa a instalação direta do prompt no Android
+    function executarInstalacaoAndroid() {
+      fecharInstaladorPWA(null);
+      if (eventoInstalacaoNativa) {
+        eventoInstalacaoNativa.prompt();
+        eventoInstalacaoNativa.userChoice.then(function(choice) {
+          if (choice.outcome === 'accepted') {
+            var containerPwa = document.getElementById("pwa-install-btn");
+            if (containerPwa) containerPwa.style.display = "none";
+            localStorage.setItem(CHAVE_PWA_, 'true'); // Memoriza a instalação com sucesso!
+          }
+          eventoInstalacaoNativa = null;
+        });
+      }
+    }
+
+    // Fecha o Modal
+    function fecharInstaladorPWA(e) {
+      if (!e || e.target === document.getElementById("pwa-modal") || typeof e === "string") {
+        document.getElementById("pwa-modal").classList.remove("active");
+      }
+    }
+
+    // Oculta o botão se o app for instalado com sucesso
+    window.addEventListener("appinstalled", function() {
+      var containerPwa = document.getElementById("pwa-install-btn");
+      if (containerPwa) containerPwa.style.display = "none";
+      localStorage.setItem(CHAVE_PWA_, 'true'); // Salva síncronamente no navegador pai
+      eventoInstalacaoNativa = null;
+    });
+  </script>
+</body>
+</html>
+
