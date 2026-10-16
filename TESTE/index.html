@@ -25,6 +25,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="AppDesenvolVi" id="meta-apple-title">
   <link rel="apple-touch-icon" href="https://app-desenvolvi.github.io/app/FAVICON_Rede.png" id="link-apple-icon">
+  <!-- Ícone da aba do navegador. Começa com o ícone fixo da unidade e passa para o FAVICON da planilha (script abaixo). -->
+  <link rel="icon" type="image/png" href="https://app-desenvolvi.github.io/app/FAVICON_Rede.png" id="link-favicon">
 
   <script>
     // 🏢 Identidade de cada unidade, escolhida por ?unidade=... ANTES da 1ª pintura: cor de fundo, nome do
@@ -50,7 +52,62 @@
       document.title = PERFIL_UNIDADE_.nome; // o iOS cai no <title> quando não lê o nome do manifest/meta
       document.write('<link rel="manifest" href="manifest.json">');
       document.getElementById('link-apple-icon').setAttribute('href', PERFIL_UNIDADE_.icone);
+      document.getElementById('link-favicon').setAttribute('href', PERFIL_UNIDADE_.icone);
       document.getElementById('meta-apple-title').setAttribute('content', PERFIL_UNIDADE_.nome);
+    })();
+
+    // 🖼️ FAVICON (CONFIGURAÇÕES, por unidade): ícone da aba, do atalho do iPhone (apple-touch-icon) e do app instalado no
+    // Android (manifest). Esta página é estática e não lê a planilha, então ela pergunta ao Apps Script (?api=favicon) e
+    // guarda a resposta no navegador: na abertura seguinte o ícone já vale antes da rede responder. Sem valor na unidade (ou
+    // se o Apps Script não responder), ficam os ícones fixos de UNIDADES_ acima. O Android lê o manifest ao instalar, por isso
+    // o manifest da unidade é recriado na hora (blob) com este ícone; o iPhone ignora o manifest e usa o apple-touch-icon.
+    var URL_BASE_EXEC_ = "https://script.google.com/macros/s/AKfycbytQm1L6r_0wrZM1mXiTO2HFM_DAfd2tDEF6h7OVxYS0xWfUG5j0y_zGVz-zOLyT1w-/exec";
+    var CHAVE_FAVICON_ = 'favicon_' + (UNIDADE_URL_ || 'PADRAO');
+    var manifestBlobUrl_ = "";
+
+    function faviconValido_(url) { return /^https:\/\/\S+$/i.test(String(url || '')) && String(url).length <= 2000; }
+
+    function guardarFavicon_(url) { try { if (url) localStorage.setItem(CHAVE_FAVICON_, url); else localStorage.removeItem(CHAVE_FAVICON_); } catch (e) {} }
+    function lerFaviconGuardado_() { try { return localStorage.getItem(CHAVE_FAVICON_) || ''; } catch (e) { return ''; } }
+
+    // Troca o ícone da aba, do iPhone e do manifest. url vazia = volta ao ícone fixo da unidade e ao manifest original.
+    function aplicarFavicon_(url) {
+      var usar = faviconValido_(url) ? url : PERFIL_UNIDADE_.icone;
+      document.getElementById('link-favicon').setAttribute('href', usar);
+      document.getElementById('link-apple-icon').setAttribute('href', usar);
+
+      var lm = document.querySelector('link[rel="manifest"]');
+      if (!lm) return;
+      if (!lm.getAttribute('data-origem')) lm.setAttribute('data-origem', lm.getAttribute('href'));
+      var origem = lm.getAttribute('data-origem');
+      if (!faviconValido_(url)) { lm.setAttribute('href', origem); return; }
+      fetch(origem).then(function(r) { return r.json(); }).then(function(m) {
+        var base = new URL(origem, window.location.href);
+        // blob: não resolve caminhos relativos, então id, início e escopo viram endereços completos (o id não muda de valor)
+        if (m.id) m.id = new URL(m.id, base).href;
+        m.start_url = new URL(m.start_url || './', base).href;
+        m.scope = new URL(m.scope || './', base).href;
+        m.icons = [{ src: url, sizes: '512x512', purpose: 'any maskable' }];
+        if (manifestBlobUrl_) { try { URL.revokeObjectURL(manifestBlobUrl_); } catch (e) {} }
+        manifestBlobUrl_ = URL.createObjectURL(new Blob([JSON.stringify(m)], { type: 'application/manifest+json' }));
+        lm.setAttribute('href', manifestBlobUrl_);
+      }).catch(function() { /* sem manifest novo: o original continua valendo */ });
+    }
+
+    (function iniciarFavicon_() {
+      var guardado = lerFaviconGuardado_();
+      if (faviconValido_(guardado)) aplicarFavicon_(guardado);   // já vale antes da rede responder
+      try {
+        fetch(URL_BASE_EXEC_ + '?api=favicon&unidade=' + encodeURIComponent(UNIDADE_URL_ || 'PADRÃO'))
+          .then(function(r) { return r.json(); })
+          .then(function(j) {
+            var novo = faviconValido_(j && j.icone) ? j.icone : '';
+            if (novo === guardado) return;                          // nada mudou
+            guardarFavicon_(novo);
+            aplicarFavicon_(novo);
+          })
+          .catch(function() { /* Apps Script fora do ar ou sem a rota: ficam os ícones atuais */ });
+      } catch (e) {}
     })();
   </script>
 
@@ -343,7 +400,7 @@
     // Assim, um link enviado ao cliente como https://app-desenvolvi.github.io/app/?page=recibo&r=abc123
     // abre aqui dentro exatamente a mesma tela, só que sem o aviso padrão do Google.
     (function montarSrcIframe() {
-      var URL_BASE_EXEC = "https://script.google.com/macros/s/AKfycbytQm1L6r_0wrZM1mXiTO2HFM_DAfd2tDEF6h7OVxYS0xWfUG5j0y_zGVz-zOLyT1w-/exec";
+      var URL_BASE_EXEC = URL_BASE_EXEC_;   // definido lá em cima (um só lugar para o endereço do Apps Script)
       var qp_ = new URLSearchParams(window.location.search); qp_.set('unidade', 'TESTE'); var query = '?' + qp_.toString(); // ex.: "?page=recibo&r=abc123", ou "" se não houver nada
       document.getElementById('app-iframe').src = URL_BASE_EXEC + query;
     })();
