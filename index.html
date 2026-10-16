@@ -36,9 +36,9 @@
     // manifest-<unidade>.json correspondente (o Android lê o manifest, o iPhone lê o "icone" daqui).
     var ICONE_PADRAO_ = "https://app-desenvolvi.github.io/app/FAVICON_Rede.png";
     var UNIDADES_ = {
-      "TESTE": { cor: "#0C2C60", nome: "Rede DesenvolVi",   icone: "https://app-desenvolvi.github.io/app/FAVICON_Rede.png", manifest: "manifest-teste.json" },
-      "JF":    { cor: "#66B7B4", nome: "FisioAmandaBaio",   icone: "https://app-desenvolvi.github.io/app/FAVICON_AB.png",   manifest: "manifest-jf.json" },
-      "SJC":   { cor: "#9966FF", nome: "DesenvolVi",  icone: "https://app-desenvolvi.github.io/app/FAVICON_DesenvolVi.png",   manifest: "manifest-sjc.json" }
+      "TESTE": { cor: "#0C2C60", nome: "Rede DesenvolVi",   icone: "https://app-desenvolvi.github.io/app/TESTE/FAVICON.png", manifest: "manifest-teste.json" },
+      "JF":    { cor: "#66B7B4", nome: "FisioAmandaBaio",   icone: "https://app-desenvolvi.github.io/app/TESTE/FAVICON.png",   manifest: "manifest-jf.json" },
+      "SJC":   { cor: "#9966FF", nome: "DesenvolVi",  icone: "https://app-desenvolvi.github.io/app/FAVICON.png",   manifest: "manifest-sjc.json" }
     };
     var UNIDADE_PADRAO_ = { cor: "#9966FF", nome: "AppDesenvolVi", icone: ICONE_PADRAO_, manifest: "manifest.json" };
     var UNIDADE_URL_ = (new URLSearchParams(window.location.search).get('unidade') || '').trim().toUpperCase();
