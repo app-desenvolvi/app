@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<!-- v.2.10.3 — Página ponte do LINK DE PAGAMENTO (GitHub Pages). O link enviado pelo WhatsApp aponta para cá para que o cartão de
+     prévia mostre sempre a imagem da DesenvolVi (e não a da InfinitePay); a página então abre o checkout. Endereço:
+     pagar.html?l=<link do checkout, codificado>. Só encaminha para endereços https da InfinitePay. -->
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Pagamento</title>
+  <meta name="theme-color" content="#fffdf7">
+  <!-- Cartão do link (WhatsApp/Instagram leem estas tags SEM executar JavaScript; igual ao da página de assinatura). -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="DesenvolVi">
+  <meta property="og:title" content="Link para pagamento">
+  <meta property="og:description" content="Toque para abrir o pagamento">
+  <meta property="og:image" content="https://app.desenvolvi.site/FAVICON_Rede.png">
+  <meta property="og:image:width" content="721">
+  <meta property="og:image:height" content="722">
+  <meta name="twitter:card" content="summary">
+  <link rel="icon" href="https://app.desenvolvi.site/FAVICON_Rede.png">
+  <style>
+    body { margin:0; padding:48px 16px; background:#fffdf7; color:#3b2a63; font-family:"DM Sans","Segoe UI",system-ui,sans-serif; text-align:center; }
+    .btn { display:inline-block; margin-top:16px; padding:12px 24px; border-radius:999px; background:#f58634; color:#fff; font-weight:700; text-decoration:none; }
+    #aviso { display:none; }
+  </style>
+</head>
+<body>
+  <p id="msg">Abrindo o pagamento...</p>
+  <p id="aviso">Não foi possível abrir este link de pagamento. Peça um novo link à escola.</p>
+  <a id="manual" class="btn" href="#" style="display:none;">Abrir o pagamento</a>
+  <script>
+    (function () {
+      var destino = "";
+      try {
+        var bruto = new URLSearchParams(location.search).get("l") || "";
+        var u = new URL(bruto);
+        // só encaminha para a InfinitePay (https), nunca para endereço qualquer
+        if (u.protocol === "https:" && (u.hostname === "infinitepay.io" || /\.infinitepay\.io$/.test(u.hostname))) destino = u.href;
+      } catch (e) { destino = ""; }
+      if (!destino) {
+        document.getElementById("msg").style.display = "none";
+        document.getElementById("aviso").style.display = "block";
+        return;
+      }
+      var a = document.getElementById("manual");
+      a.href = destino; a.style.display = "inline-block";
+      location.replace(destino);
+    })();
+  </script>
+</body>
+</html>
