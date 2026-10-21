@@ -24,31 +24,51 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="AppDesenvolVi" id="meta-apple-title">
-  <link rel="apple-touch-icon" href="https://app-desenvolvi.github.io/app/FAVICON_Rede.png" id="link-apple-icon">
-  <!-- Ícone da aba do navegador. Começa com o ícone fixo da unidade e passa para o FAVICON da planilha (script abaixo). -->
-  <link rel="icon" type="image/png" href="https://app-desenvolvi.github.io/app/FAVICON_Rede.png" id="link-favicon">
+  <link rel="apple-touch-icon" href="https://app.desenvolvi.site/FAVICON.png" id="link-apple-icon">
+  <!-- Ícone da aba do navegador. Começa com o ícone fixo da unidade (PADRÃO quando não há unidade) e passa para o FAVICON da planilha (script abaixo). -->
+  <link rel="icon" type="image/png" href="https://app.desenvolvi.site/FAVICON.png" id="link-favicon">
 
   <script>
     // 🏢 Identidade de cada unidade, escolhida por ?unidade=... ANTES da 1ª pintura: cor de fundo, nome do
     // atalho, ícone (iOS) e manifest (Android). O nome da unidade tem que ser EXATO (mesma regra do resto do
     // app: sem normalização/apelido). Página estática (GitHub Pages) — não lê a planilha ao vivo, por isso
-    // este mapa é atualizado à mão (cor = coluna COR_PRIMARIA de CONFIGURAÇÕES).
-    // Para dar ícone próprio a uma unidade: suba o PNG no repositório, troque "icone" aqui E o "src" no
-    // manifest-<unidade>.json correspondente (o Android lê o manifest, o iPhone lê o "icone" daqui).
-    var ICONE_PADRAO_ = "https://app-desenvolvi.github.io/app/FAVICON_Rede.png";
+    // este mapa é só o ponto de partida (primeira pintura e plano B): a cor (COR_PRIMARIA) e o ícone (FAVICON) de cada
+    // unidade vêm da planilha logo depois (script abaixo) e prevalecem sobre estes valores.
+    // A unidade PADRÃO (sem ?unidade=) é a base: o que a unidade não tiver, ou que não carregar, cai nos valores dela
+    // (cor #9966FF e ícone FAVICON.png, como na coluna PADRÃO de CONFIGURAÇÕES).
+    // PADRÃO DOS ÍCONES: o PNG de cada unidade fica em <UNIDADE>/FAVICON.png no site (app.desenvolvi.site/JF/FAVICON.png...),
+    // o mesmo endereço do parâmetro FAVICON da planilha; o do PADRÃO fica na raiz (FAVICON.png). Enquanto o arquivo da unidade
+    // ainda não existir no site, a página usa o ícone do PADRÃO (validarIconeFixo_ abaixo), sem mostrar imagem quebrada.
+    // Para dar ícone próprio a uma unidade: suba <UNIDADE>/FAVICON.png (e, se quiser, outro endereço no FAVICON da planilha);
+    // o "icone" aqui e o "src" no manifest-<unidade>.json são só o plano B (o Android lê o manifest, o iPhone lê o "icone" daqui).
+    var ICONE_PADRAO_ = "https://app.desenvolvi.site/FAVICON.png";
     var UNIDADES_ = {
-      "TESTE": { cor: "#0C2C60", nome: "Rede DesenvolVi",   icone: "https://app-desenvolvi.github.io/app/FAVICON_Rede.png", manifest: "manifest-teste.json" },
-      "JF":    { cor: "#66B7B4", nome: "FisioAmandaBaio",   icone: "https://app-desenvolvi.github.io/app/FAVICON_AB.png",   manifest: "manifest-jf.json" },
-      "SJC":   { cor: "#9966FF", nome: "DesenvolVi",  icone: "https://app-desenvolvi.github.io/app/FAVICON_DesenvolVi.png",   manifest: "manifest-sjc.json" }
+      "TESTE": { cor: "#66B7B4", nome: "Rede DesenvolVi",   icone: "https://app.desenvolvi.site/TESTE/FAVICON.png", manifest: "manifest-teste.json" },
+      "JF":    { cor: "#9966FF", nome: "FisioAmandaBaio",   icone: "https://app.desenvolvi.site/JF/FAVICON.png",   manifest: "manifest-jf.json" },
+      "SJC":   { cor: "#9966FF", nome: "DesenvolVi",  icone: "https://app.desenvolvi.site/SJC/FAVICON.png",   manifest: "manifest-sjc.json" }
     };
     var UNIDADE_PADRAO_ = { cor: "#9966FF", nome: "AppDesenvolVi", icone: ICONE_PADRAO_, manifest: "manifest.json" };
     var UNIDADE_URL_ = "JF";
     var PERFIL_UNIDADE_ = UNIDADES_[UNIDADE_URL_] || UNIDADE_PADRAO_;
 
-    (function aplicarIdentidadeDaUnidade() {
-      document.documentElement.style.setProperty('--cor-fundo-home', PERFIL_UNIDADE_.cor);
+    // 🎨 Cor da unidade: UMA variável (--cor-fundo-home) pinta o fundo, o botão "Instalar App" e a janela de instalação.
+    // As variações (tom mais escuro do degradê, sombra e cor do texto sobre ela) saem da mesma cor.
+    function corHexValida_(c) { return /^#[0-9A-Fa-f]{6}$/.test(String(c || '')); }
+    function aplicarCorUnidade_(cor) {
+      if (!corHexValida_(cor)) cor = PERFIL_UNIDADE_.cor;
+      var r = parseInt(cor.substr(1, 2), 16), g = parseInt(cor.substr(3, 2), 16), b = parseInt(cor.substr(5, 2), 16);
+      var luminancia = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      var st = document.documentElement.style;
+      st.setProperty('--cor-fundo-home', cor);
+      st.setProperty('--cor-fundo-home-escura', 'rgb(' + Math.round(r * 0.78) + ',' + Math.round(g * 0.78) + ',' + Math.round(b * 0.78) + ')');
+      st.setProperty('--cor-fundo-home-sombra', 'rgba(' + r + ',' + g + ',' + b + ',0.4)');
+      st.setProperty('--cor-fundo-home-texto', luminancia > 0.68 ? '#101828' : '#ffffff');   // cor clara demais: texto escuro
       var meta = document.getElementById('meta-theme-color');
-      if (meta) meta.setAttribute('content', PERFIL_UNIDADE_.cor);
+      if (meta) meta.setAttribute('content', cor);
+    }
+
+    (function aplicarIdentidadeDaUnidade() {
+      aplicarCorUnidade_(PERFIL_UNIDADE_.cor);
       document.title = PERFIL_UNIDADE_.nome; // o iOS cai no <title> quando não lê o nome do manifest/meta
       document.write('<link rel="manifest" href="manifest.json">');
       document.getElementById('link-apple-icon').setAttribute('href', PERFIL_UNIDADE_.icone);
@@ -56,25 +76,52 @@
       document.getElementById('meta-apple-title').setAttribute('content', PERFIL_UNIDADE_.nome);
     })();
 
-    // 🖼️ FAVICON (CONFIGURAÇÕES, por unidade): ícone da aba, do atalho do iPhone (apple-touch-icon) e do app instalado no
-    // Android (manifest). Esta página é estática e não lê a planilha, então ela pergunta ao Apps Script (?api=favicon) e
-    // guarda a resposta no navegador: na abertura seguinte o ícone já vale antes da rede responder. Sem valor na unidade (ou
-    // se o Apps Script não responder), ficam os ícones fixos de UNIDADES_ acima. O Android lê o manifest ao instalar, por isso
-    // o manifest da unidade é recriado na hora (blob) com este ícone; o iPhone ignora o manifest e usa o apple-touch-icon.
+    // 🖼️ IDENTIDADE DA PLANILHA (CONFIGURAÇÕES, por unidade): FAVICON = ícone da aba, do atalho do iPhone (apple-touch-icon),
+    // do app instalado no Android (manifest) e da janela "Instalar App"; COR_PRIMARIA = cor do fundo, do botão "Instalar
+    // App" e da janela. Esta página é estática e não lê a planilha, então ela pergunta ao Apps Script (?api=favicon) e guarda
+    // a resposta no navegador: na abertura seguinte já vale antes da rede responder. Sem valor na unidade (ou se o Apps
+    // Script não responder, ou se a imagem não carregar), ficam os valores fixos de UNIDADES_ acima (PADRÃO como base).
+    // O Android lê o manifest ao instalar, por isso o manifest da unidade é recriado na hora (blob) com este ícone; o iPhone
+    // ignora o manifest e usa o apple-touch-icon.
     var URL_BASE_EXEC_ = "https://script.google.com/macros/s/AKfycbytQm1L6r_0wrZM1mXiTO2HFM_DAfd2tDEF6h7OVxYS0xWfUG5j0y_zGVz-zOLyT1w-/exec";
     var CHAVE_FAVICON_ = 'favicon_' + (UNIDADE_URL_ || 'PADRAO');
+    var CHAVE_COR_ = 'cor_' + (UNIDADE_URL_ || 'PADRAO');
     var manifestBlobUrl_ = "";
+    var iconeAtual_ = PERFIL_UNIDADE_.icone;
 
     function faviconValido_(url) { return /^https:\/\/\S+$/i.test(String(url || '')) && String(url).length <= 2000; }
 
     function guardarFavicon_(url) { try { if (url) localStorage.setItem(CHAVE_FAVICON_, url); else localStorage.removeItem(CHAVE_FAVICON_); } catch (e) {} }
     function lerFaviconGuardado_() { try { return localStorage.getItem(CHAVE_FAVICON_) || ''; } catch (e) { return ''; } }
+    function guardarCor_(cor) { try { if (cor) localStorage.setItem(CHAVE_COR_, cor); else localStorage.removeItem(CHAVE_COR_); } catch (e) {} }
+    function lerCorGuardada_() { try { return localStorage.getItem(CHAVE_COR_) || ''; } catch (e) { return ''; } }
+
+    // Só aceita o ícone da planilha se a imagem realmente carregar (endereço errado ou arquivo removido = 404 não pode virar ícone).
+    function imagemCarrega_(url, aoTerminar) {
+      var img = new Image(), fim = false;
+      function terminar(ok) { if (fim) return; fim = true; aoTerminar(ok); }
+      img.onload = function() { terminar(true); };
+      img.onerror = function() { terminar(false); };
+      setTimeout(function() { terminar(false); }, 8000);
+      img.src = url;
+    }
+
+    // Janela "Instalar App": logo e nome da unidade (o elemento só existe depois que a página termina de carregar).
+    function atualizarJanelaInstalacao_() {
+      var lg = document.getElementById('pwa-logo-img');
+      if (lg && lg.getAttribute('src') !== iconeAtual_) lg.setAttribute('src', iconeAtual_);
+      var nome = document.getElementById('pwa-nome');
+      if (nome) nome.textContent = PERFIL_UNIDADE_.nome;
+    }
+    document.addEventListener('DOMContentLoaded', atualizarJanelaInstalacao_);
 
     // Troca o ícone da aba, do iPhone e do manifest. url vazia = volta ao ícone fixo da unidade e ao manifest original.
     function aplicarFavicon_(url) {
       var usar = faviconValido_(url) ? url : PERFIL_UNIDADE_.icone;
+      iconeAtual_ = usar;
       document.getElementById('link-favicon').setAttribute('href', usar);
       document.getElementById('link-apple-icon').setAttribute('href', usar);
+      atualizarJanelaInstalacao_();
 
       var lm = document.querySelector('link[rel="manifest"]');
       if (!lm) return;
@@ -94,20 +141,43 @@
       }).catch(function() { /* sem manifest novo: o original continua valendo */ });
     }
 
-    (function iniciarFavicon_() {
+    (function iniciarIdentidadeDaPlanilha_() {
+      var corGuardada = lerCorGuardada_();
+      if (corHexValida_(corGuardada)) aplicarCorUnidade_(corGuardada);   // já vale antes da rede responder
       var guardado = lerFaviconGuardado_();
-      if (faviconValido_(guardado)) aplicarFavicon_(guardado);   // já vale antes da rede responder
+      if (faviconValido_(guardado)) aplicarFavicon_(guardado);
       try {
         fetch(URL_BASE_EXEC_ + '?api=favicon&unidade=' + encodeURIComponent(UNIDADE_URL_ || 'PADRÃO'))
           .then(function(r) { return r.json(); })
           .then(function(j) {
+            // cor: valor da planilha; sem valor (ou resposta de um Apps Script ainda sem este campo) = cor fixa da unidade
+            if (j && Object.prototype.hasOwnProperty.call(j, 'cor')) {
+              var cor = corHexValida_(j.cor) ? j.cor : '';
+              if (cor !== corGuardada) { guardarCor_(cor); aplicarCorUnidade_(cor || PERFIL_UNIDADE_.cor); }
+            }
+            // ícone: só vale se a imagem carregar de verdade; senão volta ao ícone fixo e esquece o guardado
             var novo = faviconValido_(j && j.icone) ? j.icone : '';
-            if (novo === guardado) return;                          // nada mudou
-            guardarFavicon_(novo);
-            aplicarFavicon_(novo);
+            if (!novo) { if (guardado) { guardarFavicon_(''); aplicarFavicon_(''); } return; }
+            imagemCarrega_(novo, function(ok) {
+              if (ok) { if (novo !== guardado) { guardarFavicon_(novo); aplicarFavicon_(novo); } }
+              else { guardarFavicon_(''); aplicarFavicon_(''); }
+            });
           })
-          .catch(function() { /* Apps Script fora do ar ou sem a rota: ficam os ícones atuais */ });
+          .catch(function() { /* Apps Script fora do ar ou sem a rota: ficam os valores atuais */ });
       } catch (e) {}
+    })();
+
+    // Plano B protegido: o ícone fixo da unidade (<UNIDADE>/FAVICON.png) pode ainda não existir no site. Se não carregar, o
+    // PADRÃO é a base: a aba, o iPhone, a janela e o manifest do Android passam a usar o ícone do PADRÃO. Só age se nenhum ícone
+    // da planilha já estiver valendo (iconeAtual_ ainda é o fixo).
+    (function validarIconeFixo_() {
+      var fixo = PERFIL_UNIDADE_.icone;
+      if (fixo === ICONE_PADRAO_) return;
+      imagemCarrega_(fixo, function(ok) {
+        if (ok) return;
+        PERFIL_UNIDADE_.icone = ICONE_PADRAO_;
+        if (iconeAtual_ === fixo) aplicarFavicon_(ICONE_PADRAO_);
+      });
     })();
   </script>
 
@@ -181,14 +251,16 @@
       position: fixed;
       bottom: 24px;
       right: 24px;
-      background: linear-gradient(135deg, #9966FF 0%, #7D40FF 100%);
-      color: white;
+      /* MEL-0021: sempre na cor primária da unidade (variáveis definidas por aplicarCorUnidade_; o roxo é só o plano B) */
+      background: var(--cor-fundo-home, #9966FF);
+      background: linear-gradient(135deg, var(--cor-fundo-home, #9966FF) 0%, var(--cor-fundo-home-escura, #7D40FF) 100%);
+      color: var(--cor-fundo-home-texto, #ffffff);
       border: none;
       border-radius: 50px;
       padding: 14px 22px;
       font-weight: bold;
       font-size: 0.9rem;
-      box-shadow: 0 4px 16px rgba(153, 102, 255, 0.4);
+      box-shadow: 0 4px 16px var(--cor-fundo-home-sombra, rgba(153, 102, 255, 0.4));
       cursor: pointer;
       display: none; /* Inicialmente oculto, aparece dinamicamente */
       align-items: center;
@@ -254,8 +326,8 @@
 
     /* Elementos das plataformas */
     .pwa-android-btn {
-      background: #2ecc71;
-      color: white;
+      background: var(--cor-fundo-home, #9966FF);
+      color: var(--cor-fundo-home-texto, #ffffff);
       border: none;
       width: 100%;
       padding: 14px;
@@ -267,7 +339,7 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      box-shadow: 0 4px 12px rgba(46, 204, 113, 0.2);
+      box-shadow: 0 4px 12px var(--cor-fundo-home-sombra, rgba(153, 102, 255, 0.4));
     }
     .pwa-ios-instructions {
       text-align: left;
@@ -286,8 +358,8 @@
       margin-bottom: 0;
     }
     .pwa-badge {
-      background: #9966FF;
-      color: white;
+      background: var(--cor-fundo-home, #9966FF);
+      color: var(--cor-fundo-home-texto, #ffffff);
       border-radius: 50%;
       width: 18px;
       height: 18px;
@@ -359,8 +431,8 @@
   <!-- 📱 POPUP DE INSTALAÇÃO MULTI-PLATAFORMA -->
   <div id="pwa-modal" class="pwa-modal-overlay" onclick="fecharInstaladorPWA(event)">
     <div class="pwa-modal-box" onclick="event.stopPropagation()">
-      <img src="https://app-desenvolvi.github.io/app/FAVICON_Rede.png" alt="Logo" class="pwa-logo">
-      <div class="pwa-title">Instalar o AppDesenvolVi</div>
+      <img src="https://app.desenvolvi.site/FAVICON.png" alt="Logo" class="pwa-logo" id="pwa-logo-img">
+      <div class="pwa-title">Instalar o <span id="pwa-nome">AppDesenvolVi</span></div>
       <p class="pwa-text">Fixe o aplicativo direto na tela inicial do seu celular para ter carregamento instantâneo, visual em tela cheia e performance otimizada!</p>
 
       <!-- Divisão Reativa Android -->
@@ -375,11 +447,11 @@
         <div class="pwa-ios-instructions">
           <div class="pwa-ios-step">
             <span class="pwa-badge">1</span>
-            <span>Toque no botão de <b>Compartilhar</b> <i class="bi bi-box-arrow-up" style="color: #9966FF;"></i> (na barra inferior do Safari).</span>
+            <span>Toque no botão de <b>Compartilhar</b> <i class="bi bi-box-arrow-up" style="color: var(--cor-fundo-home, #9966FF);"></i> (na barra inferior do Safari).</span>
           </div>
           <div class="pwa-ios-step" style="margin-top: 8px;">
             <span class="pwa-badge">2</span>
-            <span>Role as opções para baixo e selecione <b>Adicionar à Tela de Início</b> <i class="bi bi-plus-square" style="color: #9966FF;"></i>.</span>
+            <span>Role as opções para baixo e selecione <b>Adicionar à Tela de Início</b> <i class="bi bi-plus-square" style="color: var(--cor-fundo-home, #9966FF);"></i>.</span>
           </div>
         </div>
       </div>
@@ -413,9 +485,8 @@
       if (!event.data || event.data.fonte !== 'desenvolvi-app') return;
       var cor = event.data.corPrimaria;
       if (!/^#[0-9A-Fa-f]{6}$/.test(String(cor || ''))) return;
-      document.documentElement.style.setProperty('--cor-fundo-home', cor);
-      var meta = document.getElementById('meta-theme-color');
-      if (meta) meta.setAttribute('content', cor);
+      aplicarCorUnidade_(cor);   // pinta o fundo e também o botão/janela "Instalar App" (variáveis derivadas da mesma cor)
+      guardarCor_(cor);          // guarda no navegador: na próxima abertura o fundo já nasce nesta cor
     });
 
     // 📷 PONTE DO LEITOR DE QR-CODE (tela "Check-in do evento" do app)
