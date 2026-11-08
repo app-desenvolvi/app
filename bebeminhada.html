@@ -281,14 +281,12 @@
 
         <h2 id="tit-tipo">1 · Como você quer participar?</h2>
         <div class="tipos">
-          <!-- KIT SOLIDÁRIO ENCERRADO (para reativar, remova esta linha e a de fechamento; reverter também os trechos "KIT ENCERRADO" no script)
           <label class="tipo" id="card-KIT">
             <input type="radio" name="tipo" value="KIT" onchange="escolherTipo('KIT')">
             <em class="et" id="et-kit"></em>
             <b>Vista essa causa</b>
             <div class="txt" id="txt-cartao-kit"></div>
           </label>
-          FIM KIT SOLIDÁRIO -->
           <label class="tipo" id="card-PARTICIPACAO">
             <input type="radio" name="tipo" value="PARTICIPACAO" onchange="escolherTipo('PARTICIPACAO')">
             <em class="et verde">Participação gratuita</em>
@@ -296,7 +294,7 @@
             <div class="txt" id="txt-cartao-participacao"></div>
           </label>
         </div>
-        <!-- <a href="#" class="trocar oculto" id="trocar-tipo" onclick="event.preventDefault(); trocarTipo();">Quero escolher outro tipo de inscrição</a>-->
+        <a href="#" class="trocar oculto" id="trocar-tipo" onclick="event.preventDefault(); trocarTipo();">Quero escolher outro tipo de inscrição</a>
 
         <div id="bloco" class="oculto">
           <h2>2 · Seus dados</h2>
@@ -326,7 +324,6 @@
           <button type="button" class="add" onclick="addPessoa()">+ Adicionar pessoa</button>
           <p class="resumo" id="resumo-pessoas"></p>
 
-          <!-- KIT SOLIDÁRIO ENCERRADO: seus kits e valor (para reativar, remova esta linha e a de fechamento)
           <div id="bloco-kit" class="oculto">
             <h2>4 · Seus kits</h2>
             <p class="dica" style="margin-top:0" id="txt-kits">Peça quantos kits quiser e escolha o tamanho da camiseta de cada um.</p>
@@ -344,7 +341,6 @@
               <p class="dica" id="valor-min"></p>
             </div>
           </div>
-          FIM KIT SOLIDÁRIO (bloco-kit) -->
 
           <label class="aceite">
             <input type="checkbox" id="aceite">
@@ -489,8 +485,7 @@
         if (c.dataLocal) topo += '<p>' + evtEsc(c.dataLocal) + '</p>';
         if (c.beneficiaria) topo += '<p>Em benefício de <b>' + evtEsc(c.beneficiaria) + '</b></p>';
         // Mesmo texto do site
-        // KIT ENCERRADO: texto antigo = 'Faça sua inscrição, garanta o kit da Bebêminhada e transforme uma manhã de domingo em ajuda de verdade para quem mais precisa.'
-        topo += '<p class="intro">Faça sua inscrição e venha transformar uma manhã de domingo em ajuda de verdade para quem mais precisa.</p>';
+        topo += '<p class="intro">Faça sua inscrição, garanta o kit da Bebêminhada e transforme uma manhã de domingo em ajuda de verdade para quem mais precisa.</p>';
         $("topo").innerHTML = topo;
 
         if (!c.aberto) {
@@ -499,21 +494,15 @@
           return;
         }
         // Cartões das duas formas de participar — mesmos textos do site
-        $("txt-cartao-participacao").innerHTML = 'A participação é gratuita, mas a inscrição é importante para que a organização do evento possa planejar tudo com muito carinho para você e toda sua família.';   // KIT ENCERRADO: antes terminava com '<br><strong>Não inclui o kit.</strong>'
-        /* KIT ENCERRADO (para reativar, remova este comentário)
+        $("txt-cartao-participacao").innerHTML = 'A participação é gratuita, mas a inscrição é importante para que a organização do evento possa planejar tudo com muito carinho para você e toda sua família.<br><strong>Não inclui o kit.</strong>';
         $("et-kit").textContent = (c.kitNome || 'Kit') + ' · ' + moeda(c.valorMinimoKit);
         var itens = (c.kitItens || []).map(function(t) { return '<li>' + evtEsc(t) + '</li>'; }).join('');
         $("txt-cartao-kit").innerHTML = 'Garanta seu kit oficial por <strong>' + moeda(c.valorMinimoKit) + '</strong>' + (itens ? ', com:<ul>' + itens + '</ul>' : '.<br>') +
           (c.beneficiaria ? 'Adquirindo o kit você ajuda a fortalecer o trabalho da ' + evtEsc(c.beneficiaria) + ' e torna esse movimento do bem ainda maior.' : '');
         $("txt-kits").textContent = (c.kitItens && c.kitItens.length ? 'Cada kit inclui: ' + c.kitItens.join(', ') + '. ' : '') + 'Peça quantos quiser e escolha o tamanho da camiseta de cada um.';
-        */
         $("form").classList.remove("oculto");
-        // KIT ENCERRADO: só existe a participação gratuita; já vem marcada e o formulário abre direto.
-        // (antes) if (TIPO_INICIAL) fixarTipo(TIPO_INICIAL);
-        var rpart = document.querySelector('input[name=tipo][value=PARTICIPACAO]');
-        if (rpart) rpart.checked = true;
-        escolherTipo("PARTICIPACAO");
-        if (c.prazoTexto) {
+        if (TIPO_INICIAL) fixarTipo(TIPO_INICIAL);
+                if (c.prazoTexto) {
           var aviso = document.createElement("p");
           aviso.className = "dica";
           aviso.style.textAlign = "center";
@@ -537,28 +526,21 @@
       }
       function trocarTipo() {
         $("card-PARTICIPACAO").classList.remove("oculto");
-        // KIT ENCERRADO: $("card-KIT").classList.remove("oculto");
+        $("card-KIT").classList.remove("oculto");
         $("trocar-tipo").classList.add("oculto");
         $("tit-tipo").textContent = "1 · Como você quer participar?";
       }
 
       function escolherTipo(t) {
-        // KIT ENCERRADO: qualquer valor de t vira participação gratuita (o kit não existe mais na tela).
-        // Versão com kit, para reativar:
-        //   tipo = t;
-        //   $("card-PARTICIPACAO").classList.toggle("sel", t === "PARTICIPACAO");
-        //   $("card-KIT").classList.toggle("sel", t === "KIT");
-        //   var comKit = t === "KIT";
-        //   $("bloco").classList.remove("oculto");
-        //   $("box-cpf").classList.toggle("oculto", !comKit);
-        //   $("bloco-kit").classList.toggle("oculto", !comKit);
-        //   $("btn-enviar").textContent = comKit ? "Garantir meu kit e ir para o pagamento" : "Garantir meu ingresso";
-        //   if (comKit) { if (!kits.length) kits = [""]; renderKits(); }
-        tipo = "PARTICIPACAO";
-        $("card-PARTICIPACAO").classList.add("sel");
+        tipo = t;
+        $("card-PARTICIPACAO").classList.toggle("sel", t === "PARTICIPACAO");
+        $("card-KIT").classList.toggle("sel", t === "KIT");
+        var comKit = t === "KIT";
         $("bloco").classList.remove("oculto");
-        $("box-cpf").classList.add("oculto");
-        $("btn-enviar").textContent = "Garantir meu ingresso";
+        $("box-cpf").classList.toggle("oculto", !comKit);
+        $("bloco-kit").classList.toggle("oculto", !comKit);
+        $("btn-enviar").textContent = comKit ? "Garantir meu kit e ir para o pagamento" : "Garantir meu ingresso";
+        if (comKit) { if (!kits.length) kits = [""]; renderKits(); }
         resumoPessoas();
       }
 
