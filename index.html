@@ -386,7 +386,7 @@
 
   <!-- 📣 FAIXA DE AVISO: aparece a cada carregamento da página; o X só a esconde até recarregar -->
   <div id="faixa-aviso" class="faixa-aviso" role="status">
-<img src="https://app-desenvolvi.github.io/app/Logo_Rede.png"               style="width: 150px">
+<img src="https://app-desenvolvi.github.io/app/Rede_DesenvolVi.png"               style="width: 150px">
     <span>REDE DE PROFISSIONAIS PELO DESENVOLVIMENTO INFANTIL</span>
     <button type="button" class="faixa-aviso-fechar" aria-label="Fechar aviso" onclick="fecharFaixaAviso()">&times;</button>
   </div>
@@ -414,12 +414,19 @@
     #hm-leitor { width: min(92vw, 420px); border-radius: 16px; overflow: hidden; background: #000; min-height: 200px; }
     #hm-scanner p { font-size: 0.85rem; opacity: 0.8; margin-top: 12px; text-align: center; max-width: 420px; }
     #hm-scanner button { margin-top: 18px; border: 0; border-radius: 999px; padding: 12px 34px; font-size: 1rem; font-weight: 700; background: #fff; color: #222; cursor: pointer; }
+    /* Modo quiosque: o painel de resposta cobre a tela inteira por alguns segundos e depois some, voltando à leitura. */
+    #hm-feedback { display: none; position: absolute; inset: 0; z-index: 2; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; color: #fff; }
+    #hm-feedback.aberto { display: flex; }
+    #hm-feedback .hm-fb-titulo { font-size: clamp(2rem, 7vw, 4rem); font-weight: 800; line-height: 1.1; }
+    #hm-feedback .hm-fb-linha { font-size: clamp(1.2rem, 4vw, 2.2rem); margin-top: 14px; opacity: 0.95; }
+    #hm-scanner.quiosque button { opacity: 0.35; padding: 8px 20px; font-size: 0.8rem; }
   </style>
   <div id="hm-scanner" role="dialog" aria-modal="true" aria-label="Leitor de QR-Code">
     <h3>Aponte a câmera para o QR-Code do ingresso</h3>
     <div id="hm-leitor"></div>
     <p id="hm-scanner-msg">Aguardando a câmera...</p>
-    <button type="button" onclick="fecharScannerQr_(true)">Cancelar</button>
+    <button type="button" id="hm-scanner-fechar" onclick="pedirFecharScannerQr_()">Cancelar</button>
+    <div id="hm-feedback" aria-live="assertive"><div class="hm-fb-titulo" id="hm-fb-titulo"></div><div class="hm-fb-linha" id="hm-fb-linha"></div></div>
   </div>
 
   <!-- 🚀 BOTÃO FLUTUANTE DE INSTALAÇÃO -->
@@ -512,19 +519,74 @@
       descer(ifr.contentWindow, 0);
     }
 
+    // Modo quiosque (leitura contínua): a câmera fica aberta, cada QR lido vai para o app, e o app devolve
+    // {tipo:'evtScannerFeedback', cor, titulo, linha} para pintar a resposta aqui. Enquanto espera a resposta (ou 12 s), ignora novas leituras.
+    var quiosqueQr_ = { ativo: false, ocupado: false, ultimo: '', ultimoEm: 0, timerEspera: null, timerFb: null, wake: null };
+
+    function wakeLockQuiosque_(ligar) {
+      try {
+        if (!ligar) { if (quiosqueQr_.wake) { quiosqueQr_.wake.release(); } quiosqueQr_.wake = null; return; }
+        if (navigator.wakeLock && navigator.wakeLock.request) {
+          navigator.wakeLock.request('screen').then(function(w) { quiosqueQr_.wake = w; }).catch(function() {});
+        }
+      } catch (e) {}
+    }
+    document.addEventListener('visibilitychange', function() {
+      if (quiosqueQr_.ativo && document.visibilityState === 'visible') wakeLockQuiosque_(true);
+    });
+
     function fecharScannerQr_(avisar) {
       var s = scannerQr_;
       scannerQr_ = null;
-      document.getElementById('hm-scanner').classList.remove('aberto');
+      var eraQuiosque = quiosqueQr_.ativo;
+      quiosqueQr_.ativo = false;
+      quiosqueQr_.ocupado = false;
+      if (quiosqueQr_.timerEspera) { clearTimeout(quiosqueQr_.timerEspera); quiosqueQr_.timerEspera = null; }
+      if (quiosqueQr_.timerFb) { clearTimeout(quiosqueQr_.timerFb); quiosqueQr_.timerFb = null; }
+      wakeLockQuiosque_(false);
+      var painel = document.getElementById('hm-scanner');
+      painel.classList.remove('aberto');
+      painel.classList.remove('quiosque');
+      document.getElementById('hm-feedback').classList.remove('aberto');
       if (s) { s.stop().then(function() { try { s.clear(); } catch (e) {} }).catch(function() {}); }
+      if (eraQuiosque) difundirParaApp_({ fonte: 'desenvolvi-home', tipo: 'evtScannerFechado' });
     }
 
-    function abrirScannerQr_() {
+    // No quiosque o botão de sair pede confirmação (para ninguém sair sem querer).
+    function pedirFecharScannerQr_() {
+      if (quiosqueQr_.ativo && !confirm('Sair do modo Quiosque?')) return;
+      fecharScannerQr_(true);
+    }
+
+    function mostrarFeedbackQuiosque_(cor, titulo, linha) {
+      var fb = document.getElementById('hm-feedback');
+      var cores = { verde: '#16a34a', amarelo: '#d97706', azul: '#2563eb', vermelho: '#dc2626' };
+      fb.style.background = cores[cor] || cores.vermelho;
+      document.getElementById('hm-fb-titulo').textContent = String(titulo || '').slice(0, 80);
+      document.getElementById('hm-fb-linha').textContent = String(linha || '').slice(0, 160);
+      fb.classList.add('aberto');
+      if (navigator.vibrate) navigator.vibrate(cor === 'verde' ? 80 : [120, 80, 120]);
+      if (quiosqueQr_.timerEspera) { clearTimeout(quiosqueQr_.timerEspera); quiosqueQr_.timerEspera = null; }
+      if (quiosqueQr_.timerFb) clearTimeout(quiosqueQr_.timerFb);
+      quiosqueQr_.timerFb = setTimeout(function() {
+        fb.classList.remove('aberto');
+        quiosqueQr_.ocupado = false;   // só volta a ler quando a resposta some
+        document.getElementById('hm-scanner-msg').textContent = 'Posicione o QR-Code dentro do quadrado.';
+        quiosqueQr_.timerFb = null;
+      }, 3500);
+    }
+
+    function abrirScannerQr_(continuo) {
       if (scannerQr_) return;
       var painel = document.getElementById('hm-scanner');
       var msg = document.getElementById('hm-scanner-msg');
       msg.textContent = 'Aguardando a câmera...';
       painel.classList.add('aberto');
+      quiosqueQr_.ativo = !!continuo;
+      quiosqueQr_.ocupado = false;
+      painel.classList.toggle('quiosque', !!continuo);
+      document.getElementById('hm-scanner-fechar').textContent = continuo ? 'Sair do quiosque' : 'Cancelar';
+      if (continuo) wakeLockQuiosque_(true);
 
       function iniciar() {
         if (typeof Html5Qrcode === 'undefined') {
@@ -539,9 +601,25 @@
           { fps: 10, qrbox: function(w, h) { var s = Math.floor(Math.min(w, h) * 0.7); return { width: s, height: s }; } },
           function(texto) {
             if (scannerQr_ !== leitor) return;       // já tratado
+            var txtLido = String(texto || '').slice(0, 200);
+            if (quiosqueQr_.ativo) {
+              var agora = Date.now();
+              if (quiosqueQr_.ocupado || (txtLido === quiosqueQr_.ultimo && agora - quiosqueQr_.ultimoEm < 6000)) return;
+              quiosqueQr_.ocupado = true;
+              quiosqueQr_.ultimo = txtLido;
+              quiosqueQr_.ultimoEm = agora;
+              if (navigator.vibrate) navigator.vibrate(40);
+              msg.textContent = 'Conferindo...';
+              // Sem resposta do app em 12 s (internet caiu?): avisa e volta a ler.
+              quiosqueQr_.timerEspera = setTimeout(function() {
+                mostrarFeedbackQuiosque_('vermelho', 'Sem resposta', 'Tente de novo ou fale com a organização.');
+              }, 12000);
+              difundirParaApp_({ fonte: 'desenvolvi-home', tipo: 'evtQrLido', texto: txtLido });
+              return;
+            }
             if (navigator.vibrate) navigator.vibrate(60);
             fecharScannerQr_(false);
-            difundirParaApp_({ fonte: 'desenvolvi-home', tipo: 'evtQrLido', texto: String(texto || '').slice(0, 200) });
+            difundirParaApp_({ fonte: 'desenvolvi-home', tipo: 'evtQrLido', texto: txtLido });
           },
           function() {}
         ).then(function() {
@@ -566,9 +644,15 @@
     window.addEventListener('message', function(event) {
       var origemValida = /\.googleusercontent\.com$/.test(event.origin) || event.origin === 'https://script.google.com';
       if (!origemValida) return;
-      if (!event.data || event.data.fonte !== 'desenvolvi-app' || event.data.tipo !== 'evtAbrirScanner') return;
+      if (!event.data || event.data.fonte !== 'desenvolvi-app') return;
+      if (event.data.tipo === 'evtScannerFeedback') {
+        if (quiosqueQr_.ativo) mostrarFeedbackQuiosque_(event.data.cor, event.data.titulo, event.data.linha);
+        return;
+      }
+      if (event.data.tipo === 'evtFecharScanner') { fecharScannerQr_(false); return; }
+      if (event.data.tipo !== 'evtAbrirScanner') return;
       difundirParaApp_({ fonte: 'desenvolvi-home', tipo: 'evtScannerPronto' });   // avisa o app que a ponte existe
-      abrirScannerQr_();
+      abrirScannerQr_(event.data.continuo === true);
     });
 
     // --- 1. REGISTRO DO SERVICE WORKER NO SEU PRÓPRIO DOMÍNIO ---
