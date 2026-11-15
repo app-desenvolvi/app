@@ -50,9 +50,28 @@
     .previa { background:#ece9f3; border:1px solid var(--line); border-radius:16px; padding:10px; max-height:70vh; overflow:auto; }
     .previa canvas { display:block; width:100%; height:auto; background:#fff; box-shadow:0 1px 6px rgba(0,0,0,.18); margin:0 0 10px; }
     .previa .espera { padding:34px 10px; }
-    .pad { border:2px dashed rgba(59,42,99,.35); border-radius:16px; background:#fff; touch-action:none; position:relative; }
-    .pad canvas { display:block; width:100%; height:180px; border-radius:14px; touch-action:none; }
-    .pad .dica { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#9a93a8; pointer-events:none; font-size:15px; }
+    .pad { border:2px dashed rgba(59,42,99,.35); border-radius:16px; background:#fff; position:relative; min-height:150px; cursor:pointer; overflow:hidden; }
+    .pad img { display:block; width:100%; max-height:200px; object-fit:contain; padding:8px; }
+    .pad .dica { position:absolute; inset:0; display:flex; flex-direction:column; gap:6px; align-items:center; justify-content:center; color:#6b6480; pointer-events:none; font-size:16px; font-weight:700; }
+    .pad .dica small { font-weight:400; font-size:13px; color:#9a93a8; }
+    /* Tela cheia de assinatura: o quadro ocupa quase tudo; no celular em pé aparece o ícone animado pedindo para girar */
+    #pad-tela { position:fixed; inset:0; z-index:50; background:var(--cream); display:flex; flex-direction:column; padding:8px; gap:8px; touch-action:none; overscroll-behavior:contain; }
+    #pad-tela .topo { display:flex; align-items:center; gap:10px; flex:0 0 auto; }
+    #pad-tela .topo .tit { flex:1; font-weight:700; font-size:15px; line-height:1.25; }
+    #pad-tela .quadro { flex:1 1 auto; position:relative; border:2px dashed rgba(59,42,99,.4); border-radius:14px; background:#fff; min-height:0; touch-action:none; }
+    #pad-tela canvas { position:absolute; inset:0; width:100%; height:100%; border-radius:12px; touch-action:none; }
+    #pad-tela .linha-base { position:absolute; left:6%; right:6%; bottom:26%; border-bottom:1.5px solid rgba(59,42,99,.22); pointer-events:none; }
+    #pad-tela .dica-tela { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#b3adc0; font-size:20px; pointer-events:none; }
+    #pad-tela .acoes { display:flex; gap:10px; flex:0 0 auto; }
+    #pad-tela .acoes .btn { margin-top:0; padding:13px; font-size:16px; flex:1; }
+    #pad-tela .acoes .btn.sec { flex:0 0 32%; }
+    #pad-tela .fechar-x { flex:0 0 auto; width:38px; height:38px; border:0; border-radius:50%; background:#ece9f3; color:var(--ink); font-size:18px; line-height:1; cursor:pointer; }
+    .gire { display:none; align-items:center; gap:10px; padding:8px 12px; border-radius:14px; background:var(--sand); flex:0 0 auto; font-size:14px; line-height:1.3; }
+    .gire svg { width:44px; height:44px; flex:0 0 auto; }
+    .gire .fone { transform-origin:50% 50%; animation:girar 2.6s ease-in-out infinite; }
+    @keyframes girar { 0%,18% { transform:rotate(0deg); } 52%,82% { transform:rotate(-90deg); } 100% { transform:rotate(0deg); } }
+    @media (orientation:portrait) { #pad-tela .gire { display:flex; } }
+    @media (prefers-reduced-motion:reduce) { .gire .fone { animation:none; transform:rotate(-90deg); } }
     .linha { display:flex; gap:10px; align-items:center; justify-content:space-between; margin-top:8px; }
     .link { background:none; border:0; color:var(--terra); font:inherit; font-weight:700; text-decoration:underline; cursor:pointer; padding:6px 0; }
     .aceite { display:flex; gap:10px; align-items:flex-start; margin-top:20px; font-size:14px; line-height:1.45; color:var(--body); }
@@ -97,12 +116,33 @@
       </div>
 
       <h2 id="tit-ass">3 · Assine</h2>
-      <p class="sub">Desenhe a sua assinatura no quadro com o dedo (ou o mouse).</p>
-      <div class="pad" id="pad" style="margin-top:10px">
-        <canvas id="canvas"></canvas>
-        <div class="dica" id="pad-dica">Assine aqui</div>
+      <p class="sub">Toque no quadro para assinar em tela cheia, com o dedo (ou o mouse). Se puder, deite o celular: fica bem mais fácil.</p>
+      <div class="pad" id="pad" style="margin-top:10px" role="button" tabindex="0" aria-label="Abrir o quadro de assinatura em tela cheia">
+        <img id="pad-img" class="oculto" alt="Sua assinatura">
+        <div class="dica" id="pad-dica">Toque aqui para assinar<small>abre em tela cheia</small></div>
       </div>
-      <div class="linha"><span class="nota" style="margin:0">A assinatura é a sua, feita agora, neste aparelho.</span><button type="button" class="link" id="limpar">Limpar</button></div>
+      <div class="linha"><span class="nota" style="margin:0">A assinatura é a sua, feita agora, neste aparelho.</span><button type="button" class="link oculto" id="limpar">Refazer</button></div>
+
+      <!-- Tela cheia da assinatura -->
+      <div id="pad-tela" class="oculto" role="dialog" aria-modal="true" aria-label="Quadro de assinatura">
+        <div class="gire" id="gire">
+          <svg viewBox="0 0 48 48" aria-hidden="true">
+            <g class="fone"><rect x="14" y="5" width="20" height="38" rx="4" fill="#fff" stroke="#3b2a63" stroke-width="2.4"/><rect x="18" y="10" width="12" height="24" rx="1.5" fill="#ffd9b8"/><circle cx="24" cy="38.5" r="1.6" fill="#3b2a63"/></g>
+            <path d="M38 12c3 2 5 5 5 9" fill="none" stroke="#d9611a" stroke-width="2.4" stroke-linecap="round"/><path d="M43 21l-3-3.4M43 21l3-3.4" fill="none" stroke="#d9611a" stroke-width="2.4" stroke-linecap="round"/>
+          </svg>
+          <span><b>Gire o celular</b> e assine com ele deitado: o espaço é bem maior.</span>
+        </div>
+        <div class="topo"><span class="tit">Assine no quadro abaixo</span><button type="button" class="fechar-x" id="pad-cancelar" aria-label="Fechar sem assinar">✕</button></div>
+        <div class="quadro" id="quadro">
+          <canvas id="canvas"></canvas>
+          <div class="linha-base"></div>
+          <div class="dica-tela" id="pad-dica-tela">Assine aqui</div>
+        </div>
+        <div class="acoes">
+          <button type="button" class="btn sec" id="pad-limpar">Limpar</button>
+          <button type="button" class="btn" id="pad-concluir">Concluir</button>
+        </div>
+      </div>
 
       <label class="aceite">
         <input type="checkbox" id="aceite">
@@ -427,30 +467,51 @@
       });
     }
 
-    // ---------- Quadro de assinatura ----------
-    var pad = { canvas: null, ctx: null, desenhando: false, tracos: 0, ultimo: null, pronto: false };
+    // ---------- Quadro de assinatura (tela cheia) ----------
+    var pad = { canvas: null, ctx: null, desenhando: false, tracos: 0, ultimo: null, pronto: false, png: "", aberto: false };
 
     function iniciarPad() {
-      var c = $("canvas"); pad.canvas = c; pad.ctx = c.getContext("2d");
-      function ajustar() {
-        var r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
-        var larg = r.width || c.parentNode.clientWidth || 300, alt = r.height || 180;   // sem layout (aba oculta): usa um tamanho seguro
-        c.width = Math.round(larg * dpr); c.height = Math.round(alt * dpr);
-        pad.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        pad.ctx.lineWidth = 2.6; pad.ctx.lineCap = "round"; pad.ctx.lineJoin = "round"; pad.ctx.strokeStyle = "#1c1233";
-        pad.tracos = 0; $("pad-dica").classList.remove("oculto");
-      }
-      ajustar();
       if (pad.pronto) return;
       pad.pronto = true;
-      window.addEventListener("resize", function() { if (pad.tracos === 0) ajustar(); });
+      var c = $("canvas"); pad.canvas = c; pad.ctx = c.getContext("2d");
+      function estilo() { pad.ctx.lineWidth = 3; pad.ctx.lineCap = "round"; pad.ctx.lineJoin = "round"; pad.ctx.strokeStyle = "#1c1233"; pad.ctx.fillStyle = "#1c1233"; }
+      // preservar = true: girou o celular com a assinatura já feita; redesenha o que existe, encaixado no novo tamanho.
+      function ajustar(preservar) {
+        var foto = (preservar && pad.tracos > 0) ? c.toDataURL() : null, antW = c.width, antH = c.height;
+        var r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+        var larg = r.width || 300, alt = r.height || 180;
+        c.width = Math.round(larg * dpr); c.height = Math.round(alt * dpr);
+        pad.ctx.setTransform(dpr, 0, 0, dpr, 0, 0); estilo();
+        if (foto) {
+          var im = new Image();
+          im.onload = function() {
+            var k = Math.min(c.width / antW, c.height / antH), w = antW * k, h = antH * k;
+            pad.ctx.save(); pad.ctx.setTransform(1, 0, 0, 1, 0, 0);
+            pad.ctx.drawImage(im, (c.width - w) / 2, (c.height - h) / 2, w, h);
+            pad.ctx.restore();
+          };
+          im.src = foto;
+        } else { pad.tracos = 0; $("pad-dica-tela").classList.remove("oculto"); }
+      }
+      function abrir() {
+        pad.aberto = true; $("pad-tela").classList.remove("oculto");
+        document.body.style.overflow = "hidden";
+        ajustar(false);
+      }
+      function fechar() { pad.aberto = false; $("pad-tela").classList.add("oculto"); document.body.style.overflow = ""; }
+      $("pad").addEventListener("click", abrir);
+      $("pad").addEventListener("keydown", function(ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); abrir(); } });
+      var timer = null;
+      function aoGirar() { if (!pad.aberto) return; clearTimeout(timer); timer = setTimeout(function() { ajustar(true); }, 250); }
+      window.addEventListener("resize", aoGirar); window.addEventListener("orientationchange", aoGirar);
+      document.addEventListener("keydown", function(ev) { if (ev.key === "Escape" && pad.aberto) fechar(); });
 
       function pos(ev) { var r = c.getBoundingClientRect(); return { x: ev.clientX - r.left, y: ev.clientY - r.top }; }
       c.addEventListener("pointerdown", function(ev) {
         ev.preventDefault(); try { c.setPointerCapture(ev.pointerId); } catch (e) {}
         pad.desenhando = true; pad.ultimo = pos(ev);
-        pad.ctx.beginPath(); pad.ctx.arc(pad.ultimo.x, pad.ultimo.y, 1.2, 0, 6.3); pad.ctx.fill();
-        pad.tracos++; $("pad-dica").classList.add("oculto");
+        pad.ctx.beginPath(); pad.ctx.arc(pad.ultimo.x, pad.ultimo.y, 1.5, 0, 6.3); pad.ctx.fill();
+        pad.tracos++; $("pad-dica-tela").classList.add("oculto");
       });
       c.addEventListener("pointermove", function(ev) {
         if (!pad.desenhando) return; ev.preventDefault();
@@ -460,12 +521,25 @@
       });
       function fim() { pad.desenhando = false; }
       c.addEventListener("pointerup", fim); c.addEventListener("pointercancel", fim); c.addEventListener("pointerleave", fim);
+
+      $("pad-limpar").addEventListener("click", function() { ajustar(false); });
+      $("pad-cancelar").addEventListener("click", fechar);
+      $("pad-concluir").addEventListener("click", function() {
+        var png = assinaturaPng();
+        if (!png) { var d = $("pad-dica-tela"); d.textContent = "Desenhe a sua assinatura antes de concluir"; d.classList.remove("oculto"); return; }
+        pad.png = png;
+        $("pad-img").src = png; $("pad-img").classList.remove("oculto");
+        $("pad-dica").classList.add("oculto"); $("limpar").classList.remove("oculto");
+        $("erro").classList.add("oculto");
+        fechar();
+      });
       $("limpar").addEventListener("click", function() {
-        pad.ctx.clearRect(0, 0, c.width, c.height); pad.tracos = 0; $("pad-dica").classList.remove("oculto");
+        pad.png = ""; $("pad-img").classList.add("oculto"); $("pad-img").removeAttribute("src");
+        $("pad-dica").classList.remove("oculto"); $("limpar").classList.add("oculto");
       });
     }
 
-    // Recorta o desenho (fundo transparente) para a assinatura não ficar com bordas enormes no PDF.
+    // Recorta o desenho (fundo transparente) para a assinatura não ficar com bordas enormes no PDF; limita a 900 px de largura.
     function assinaturaPng() {
       var c = pad.canvas, w = c.width, h = c.height;
       var dados = pad.ctx.getImageData(0, 0, w, h).data;
@@ -475,11 +549,11 @@
       }
       if (pixels < 40) return "";
       var m = 8; x0 = Math.max(0, x0 - m); y0 = Math.max(0, y0 - m); x1 = Math.min(w - 1, x1 + m); y1 = Math.min(h - 1, y1 + m);
-      var rec = document.createElement("canvas"); rec.width = x1 - x0 + 1; rec.height = y1 - y0 + 1;
-      rec.getContext("2d").drawImage(c, x0, y0, rec.width, rec.height, 0, 0, rec.width, rec.height);
+      var lw = x1 - x0 + 1, lh = y1 - y0 + 1, k = Math.min(1, 900 / lw);
+      var rec = document.createElement("canvas"); rec.width = Math.max(1, Math.round(lw * k)); rec.height = Math.max(1, Math.round(lh * k));
+      rec.getContext("2d").drawImage(c, x0, y0, lw, lh, 0, 0, rec.width, rec.height);
       return rec.toDataURL("image/png");
     }
-
     // ---------- Envio ----------
     function erro(msg) { var e = $("erro"); e.textContent = msg; e.classList.remove("oculto"); e.scrollIntoView({ behavior: "smooth", block: "center" }); }
 
@@ -491,8 +565,8 @@
         if (!v && !vazio) vazio = c;
       });
       if (vazio) { $("c-" + vazio.marcador).focus(); return erro("Preencha o campo “" + vazio.rotulo + "”."); }
-      var png = assinaturaPng();
-      if (!png) return erro("Desenhe a sua assinatura no quadro.");
+      var png = pad.png;
+      if (!png) return erro("Toque no quadro e desenhe a sua assinatura.");
       if (!$("aceite").checked) return erro("Marque que leu o documento e concorda para assinar.");
 
       var btn = $("btn-assinar"); btn.disabled = true; btn.textContent = "Registrando a assinatura...";
