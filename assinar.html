@@ -468,61 +468,92 @@
     }
 
     // ---------- Quadro de assinatura (tela cheia) ----------
-    var pad = { canvas: null, ctx: null, desenhando: false, tracos: 0, ultimo: null, pronto: false, png: "", aberto: false };
+    var pad = { canvas: null, ctx: null, desenhando: false, pronto: false, png: "", aberto: false, tracos: [], atual: null, tr: { s: 1, ox: 0, oy: 0 }, w: 0, h: 0 };
 
     function iniciarPad() {
       if (pad.pronto) return;
       pad.pronto = true;
       var c = $("canvas"); pad.canvas = c; pad.ctx = c.getContext("2d");
-      function estilo() { pad.ctx.lineWidth = 3; pad.ctx.lineCap = "round"; pad.ctx.lineJoin = "round"; pad.ctx.strokeStyle = "#1c1233"; pad.ctx.fillStyle = "#1c1233"; }
-      // preservar = true: girou o celular com a assinatura já feita; redesenha o que existe, encaixado no novo tamanho.
-      function ajustar(preservar) {
-        var foto = (preservar && pad.tracos > 0) ? c.toDataURL() : null, antW = c.width, antH = c.height;
+
+      // A assinatura fica guardada como TRAÇOS (coordenadas "do mundo"); o canvas é sempre redesenhado a partir deles.
+      // Assim girar o celular (quantas vezes for) nunca degrada nem encolhe o desenho: o tamanho é recalculado do original.
+      function redesenhar() {
+        var dpr = window.devicePixelRatio || 1, t = pad.tr, ctx = pad.ctx;
+        ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, c.width, c.height);
+        ctx.setTransform(dpr * t.s, 0, 0, dpr * t.s, dpr * t.ox, dpr * t.oy);
+        ctx.lineWidth = Math.max(3, 2 / t.s); ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.strokeStyle = "#1c1233"; ctx.fillStyle = "#1c1233";
+        pad.tracos.forEach(function(tr) { desenharTraco(tr); });
+        $("pad-dica-tela").classList.toggle("oculto", pad.tracos.length > 0);
+      }
+      function desenharTraco(tr) {
+        var ctx = pad.ctx;
+        if (tr.length === 1) { ctx.beginPath(); ctx.arc(tr[0].x, tr[0].y, ctx.lineWidth / 2, 0, 6.3); ctx.fill(); return; }
+        ctx.beginPath(); ctx.moveTo(tr[0].x, tr[0].y);
+        for (var k = 1; k < tr.length; k++) ctx.lineTo(tr[k].x, tr[k].y);
+        ctx.stroke();
+      }
+      // Mede o quadro AGORA, ajusta o bitmap e encaixa o desenho (só reduz se não couber; volta ao tamanho original quando cabe).
+      function layout() {
         var r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
-        var larg = r.width || 300, alt = r.height || 180;
-        c.width = Math.round(larg * dpr); c.height = Math.round(alt * dpr);
-        pad.ctx.setTransform(dpr, 0, 0, dpr, 0, 0); estilo();
-        if (foto) {
-          var im = new Image();
-          im.onload = function() {
-            var k = Math.min(c.width / antW, c.height / antH), w = antW * k, h = antH * k;
-            pad.ctx.save(); pad.ctx.setTransform(1, 0, 0, 1, 0, 0);
-            pad.ctx.drawImage(im, (c.width - w) / 2, (c.height - h) / 2, w, h);
-            pad.ctx.restore();
-          };
-          im.src = foto;
-        } else { pad.tracos = 0; $("pad-dica-tela").classList.remove("oculto"); }
+        if (r.width < 50 || r.height < 50) return false;   // medida no meio da transição de giro: ignora, o observador chama de novo
+        c.width = Math.round(r.width * dpr); c.height = Math.round(r.height * dpr);
+        pad.w = r.width; pad.h = r.height;
+        var t = { s: 1, ox: 0, oy: 0 };
+        if (pad.tracos.length) {
+          var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+          pad.tracos.forEach(function(tr) { tr.forEach(function(p) { if (p.x < x0) x0 = p.x; if (p.x > x1) x1 = p.x; if (p.y < y0) y0 = p.y; if (p.y > y1) y1 = p.y; }); });
+          var bw = Math.max(1, x1 - x0), bh = Math.max(1, y1 - y0);
+          t.s = Math.min(1, (r.width - 40) / bw, (r.height - 40) / bh);
+          t.ox = r.width / 2 - (x0 + bw / 2) * t.s; t.oy = r.height / 2 - (y0 + bh / 2) * t.s;
+        }
+        pad.tr = t; redesenhar();
+        return true;
+      }
+      var agendado = false;
+      function pedirLayout() {
+        if (!pad.aberto || agendado) return;
+        agendado = true;
+        requestAnimationFrame(function() { agendado = false; if (pad.aberto) layout(); });
       }
       function abrir() {
         pad.aberto = true; $("pad-tela").classList.remove("oculto");
         document.body.style.overflow = "hidden";
-        ajustar(false);
+        pad.tracos = []; pad.tr = { s: 1, ox: 0, oy: 0 };
+        pedirLayout(); setTimeout(pedirLayout, 120);
       }
       function fechar() { pad.aberto = false; $("pad-tela").classList.add("oculto"); document.body.style.overflow = ""; }
       $("pad").addEventListener("click", abrir);
       $("pad").addEventListener("keydown", function(ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); abrir(); } });
-      var timer = null;
-      function aoGirar() { if (!pad.aberto) return; clearTimeout(timer); timer = setTimeout(function() { ajustar(true); }, 250); }
-      window.addEventListener("resize", aoGirar); window.addEventListener("orientationchange", aoGirar);
+      // Qualquer mudança real de tamanho do quadro (girar, barra do navegador, teclado) refaz o encaixe a partir dos traços.
+      if (window.ResizeObserver) new ResizeObserver(pedirLayout).observe($("quadro"));
+      window.addEventListener("resize", function() { pedirLayout(); setTimeout(pedirLayout, 300); });
+      window.addEventListener("orientationchange", function() { setTimeout(pedirLayout, 150); setTimeout(pedirLayout, 500); });
       document.addEventListener("keydown", function(ev) { if (ev.key === "Escape" && pad.aberto) fechar(); });
 
-      function pos(ev) { var r = c.getBoundingClientRect(); return { x: ev.clientX - r.left, y: ev.clientY - r.top }; }
+      function pos(ev) {
+        var r = c.getBoundingClientRect(), t = pad.tr;
+        return { x: (ev.clientX - r.left - t.ox) / t.s, y: (ev.clientY - r.top - t.oy) / t.s };
+      }
       c.addEventListener("pointerdown", function(ev) {
-        ev.preventDefault(); try { c.setPointerCapture(ev.pointerId); } catch (e) {}
-        pad.desenhando = true; pad.ultimo = pos(ev);
-        pad.ctx.beginPath(); pad.ctx.arc(pad.ultimo.x, pad.ultimo.y, 1.5, 0, 6.3); pad.ctx.fill();
-        pad.tracos++; $("pad-dica-tela").classList.add("oculto");
+        ev.preventDefault();
+        // Se o bitmap ficou com o tamanho da orientação anterior, mede e ajusta antes de aceitar o traço (era o que impedia escrever depois de girar).
+        var r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+        if (Math.abs(c.width - Math.round(r.width * dpr)) > 1 || Math.abs(c.height - Math.round(r.height * dpr)) > 1) layout();
+        try { c.setPointerCapture(ev.pointerId); } catch (e) {}
+        pad.desenhando = true; pad.atual = [pos(ev)]; pad.tracos.push(pad.atual);
+        redesenhar();
       });
       c.addEventListener("pointermove", function(ev) {
-        if (!pad.desenhando) return; ev.preventDefault();
-        var p = pos(ev);
-        pad.ctx.beginPath(); pad.ctx.moveTo(pad.ultimo.x, pad.ultimo.y); pad.ctx.lineTo(p.x, p.y); pad.ctx.stroke();
-        pad.ultimo = p;
+        if (!pad.desenhando || !pad.atual) return; ev.preventDefault();
+        var p = pos(ev), a = pad.atual[pad.atual.length - 1], ctx = pad.ctx;
+        pad.atual.push(p);
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(p.x, p.y); ctx.stroke();
       });
-      function fim() { pad.desenhando = false; }
-      c.addEventListener("pointerup", fim); c.addEventListener("pointercancel", fim); c.addEventListener("pointerleave", fim);
+      function fim() { pad.desenhando = false; pad.atual = null; }
+      c.addEventListener("pointerup", fim); c.addEventListener("pointercancel", fim);
+      // (sem pointerleave: com o dedo capturado ele cortava o traço ao encostar na borda)
 
-      $("pad-limpar").addEventListener("click", function() { ajustar(false); });
+      $("pad-limpar").addEventListener("click", function() { pad.tracos = []; pad.tr = { s: 1, ox: 0, oy: 0 }; layout(); });
       $("pad-cancelar").addEventListener("click", fechar);
       $("pad-concluir").addEventListener("click", function() {
         var png = assinaturaPng();
@@ -538,7 +569,6 @@
         $("pad-dica").classList.remove("oculto"); $("limpar").classList.add("oculto");
       });
     }
-
     // Recorta o desenho (fundo transparente) para a assinatura não ficar com bordas enormes no PDF; limita a 900 px de largura.
     function assinaturaPng() {
       var c = pad.canvas, w = c.width, h = c.height;
